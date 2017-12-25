@@ -4,4 +4,5 @@ import com.arellomobile.mvp.MvpView
 
 
 interface ProductListView : MvpView {
+    fun showMessage()
 }
