@@ -4,13 +4,39 @@ import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
 
-
-data class ProductHuntApiResponse(
+data class ProductHuntTopicsApiResponse(
         @SerializedName("topics") var topics: List<Topic>? = null
 )
 
-data class Topic(
+data class ProductHuntProductsApiResponse(
+        @SerializedName("posts") @Expose var posts: List<Post>? = null
+)
 
+data class Post(
+        @SerializedName("name") @Expose var name: String? = null,
+
+        @SerializedName("tagline") @Expose var tagline: String? = null,
+
+        @SerializedName("redirect_url") @Expose var redirectUrl: String? = null,
+
+        @SerializedName("screenshot_url") @Expose var screenshotUrl: ScreenshotUrl? = null,
+
+        @SerializedName("thumbnail") @Expose var thumbnail: Thumbnail? = null,
+
+        @SerializedName("votes_count") @Expose var votesCount: Int? = null
+)
+
+data class Thumbnail(
+        @SerializedName("image_url") @Expose var imageUrl: String? = null
+)
+
+data class ScreenshotUrl(
+        @SerializedName("300px") @Expose var _300px: String? = null,
+
+        @SerializedName("850px") @Expose var _850px: String? = null
+)
+
+data class Topic(
         @SerializedName("id") @Expose var id: Int? = null, // 356
 
         @SerializedName("name") @Expose var name: String? = null, // Touch Bar Apps

@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">ForJunto</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <string-array name="categoriesSpinnerAdapter">
+        <item>"first"</item>
+        <item>"second"</item>
+        <item>"third"</item>
+    </string-array>
 </resources>

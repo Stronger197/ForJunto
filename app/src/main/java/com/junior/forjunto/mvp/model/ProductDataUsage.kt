@@ -8,7 +8,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.junior.forjunto.App
 import com.junior.forjunto.mvp.presenter.ProductListPresenter
-import com.junior.forjunto.network.ProductHuntTopicsApi
+import com.junior.forjunto.network.ProductHuntProductsApi
 import com.junior.forjunto.productHuntToken
 import retrofit2.Call
 import retrofit2.Callback
@@ -16,11 +16,10 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-
-class DataUsage(productListPresenter: ProductListPresenter) {
-    private val TAG: String = "Producthunt API"
+class ProductDataUsage(productListPresenter: ProductListPresenter) {
+    private val TAG: String = "Producthunt Products"
     private var productListPresenterInterface: IProductListPresenter? = null
-    private var productHuntTopicsApi: ProductHuntTopicsApi? = null
+    private var productHuntProductsApi: ProductHuntProductsApi? = null
     private var retrofit: Retrofit? = null
     private var dbHelper: DBHelper? = null
 
@@ -28,72 +27,74 @@ class DataUsage(productListPresenter: ProductListPresenter) {
         productListPresenterInterface = productListPresenter
     }
 
-    // this function get topics from product hunt api, cache it in memory
+
+    // this function get products from producthunt api, cache it in memory
     // When is done function invoke callback from presenter class
-    fun updateTopics() {
-        getTopics()
+    fun updateProducts(category: String) {
+        getProducts(category)
     }
+
 
     // This function using product hunt API to get list of topics
     // When is done all data caches in local database
-    private fun getTopics() {
-        Log.d(TAG, "getTopics Invoke")
-        productListPresenterInterface!!.topicListUpdating()
-        getApi().getData("Bearer " + productHuntToken).enqueue(object : Callback<ProductHuntTopicsApiResponse> {
-            override fun onResponse(call: Call<ProductHuntTopicsApiResponse>, response: Response<ProductHuntTopicsApiResponse>) {
+    private fun getProducts(category: String) {
+        getApi().getData("Bearer " + productHuntToken, category).enqueue(object : Callback<ProductHuntProductsApiResponse> {
+            override fun onResponse(call: Call<ProductHuntProductsApiResponse>, response: Response<ProductHuntProductsApiResponse>) {
                 val body = response.body()
                 Log.d(TAG, "Response CODE: " + response.code())
                 Log.d(TAG, "Response Body: " + response.body().toString())
                 if (body != null) {
-                    cacheTopicList(body.topics!!)
+                    cacheProductsList(body.posts, category)
                 } else {
-                    productListPresenterInterface!!.topicListUpdatingError()
+                    // TODO ERROR
                 }
             }
 
-            override fun onFailure(call: Call<ProductHuntTopicsApiResponse>, t: Throwable) {
+            override fun onFailure(call: Call<ProductHuntProductsApiResponse>, t: Throwable) {
                 Log.d(TAG, "error: " + t.message)
-                productListPresenterInterface!!.topicListUpdatingError()
+                // TODO ERROR
             }
         })
     }
 
+
     // Saving topics data in cache
     // key: topic name (slug)
     // value: Topic object
-    private fun cacheTopicList(topics: List<Topic>) {
+    private fun cacheProductsList(posts: List<Post>?, category: String) {
         val db = getDbHelper().writableDatabase
         val gson = Gson()
 
-        for (topic in topics) {
-            val sqlEscapeId = DatabaseUtils.sqlEscapeString(topic.slug)
-            val sqlEscapeObj = DatabaseUtils.sqlEscapeString(gson.toJson(topic))
-            db.execSQL("replace into Topics (id, obj) values ($sqlEscapeId ,$sqlEscapeObj);")
+        if (posts != null) {
+            val sqlEscapeId = DatabaseUtils.sqlEscapeString(category)
+            val sqlEscapeObj = DatabaseUtils.sqlEscapeString(gson.toJson(posts))
+            db.execSQL("replace into Products (id, obj) values ($sqlEscapeId ,$sqlEscapeObj);")
+        } else {
+            // TODO ERROR
         }
 
         db.close()
-        getTopicListFromCache()
+        getProductListFromCache(category)
     }
 
-    // function to get list of Topics from cache
-    fun getTopicListFromCache() {
+
+    fun getProductListFromCache(category: String) {
         val gson = Gson()
-        Log.d("DB", "GET TOPIC LIST INOVKE")
+        Log.d("DB", "GET POST LIST INOVKE")
         val db = getDbHelper().writableDatabase
-        val c = db.query("Topics", arrayOf("obj"), null, null, null, null, null)
-        var data = mutableListOf<Topic>()
+        val sqlEscapeObj = DatabaseUtils.sqlEscapeString("\"$category\"")
+        Log.d(TAG, "sqlEscapeObj: " + sqlEscapeObj)
+        val c = db.query("Products", arrayOf("obj"), "id == \"" + category + "\"", null, null, null, null)
+
         if (c.moveToFirst()) {
-            do {
-                Log.d(TAG, "Obj: " + c.getString(0))
-                data.add(gson.fromJson(c.getString(0), Topic::class.java))
-            } while (c.moveToNext())
+            val data = gson.fromJson("{posts=${c.getString(0)}}", ProductHuntProductsApiResponse::class.java)
+            productListPresenterInterface?.productListUpdated(data)
         } else
             Log.d(TAG, "0 rows")
 
+
         c.close()
         db.close()
-
-        productListPresenterInterface!!.topicListUpdated(data)
     }
 
 
@@ -105,7 +106,7 @@ class DataUsage(productListPresenter: ProductListPresenter) {
     }
 
     // returns interface to work with producthunt API
-    private fun getApi(): ProductHuntTopicsApi {
+    private fun getApi(): ProductHuntProductsApi {
         if (retrofit == null) {
             retrofit = Retrofit.Builder()
                     .baseUrl("https://api.producthunt.com")
@@ -113,11 +114,11 @@ class DataUsage(productListPresenter: ProductListPresenter) {
                     .build()
         }
 
-        if (productHuntTopicsApi == null) {
-            productHuntTopicsApi = retrofit!!.create<ProductHuntTopicsApi>(ProductHuntTopicsApi::class.java)
+        if (productHuntProductsApi == null) {
+            productHuntProductsApi = retrofit!!.create<ProductHuntProductsApi>(ProductHuntProductsApi::class.java)
         }
 
-        return productHuntTopicsApi!!
+        return productHuntProductsApi!!
     }
 
     internal inner class DBHelper(context: Context) : SQLiteOpenHelper(context, "ProducthuntDB", null, 1) {

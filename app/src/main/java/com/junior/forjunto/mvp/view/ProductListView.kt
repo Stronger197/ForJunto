@@ -4,5 +4,7 @@ import com.arellomobile.mvp.MvpView
 
 
 interface ProductListView : MvpView {
-    fun showMessage()
+    fun updateTopicList(data: Set<String>)
+    fun showAppbarProgressBar()
+    fun hideAppbarProgressBar()
 }
