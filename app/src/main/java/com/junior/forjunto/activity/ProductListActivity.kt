@@ -1,8 +1,10 @@
 package com.junior.forjunto.activity
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
@@ -10,6 +12,7 @@ import android.view.View
 import android.widget.*
 import com.arellomobile.mvp.MvpAppCompatActivity
 import com.arellomobile.mvp.presenter.InjectPresenter
+import com.google.gson.Gson
 import com.junior.forjunto.ProductRecyclerViewAdapter
 import com.junior.forjunto.R
 import com.junior.forjunto.mvp.model.Post
@@ -17,16 +20,49 @@ import com.junior.forjunto.mvp.presenter.ProductListPresenter
 import com.junior.forjunto.mvp.view.ProductListView
 import kotlinx.android.synthetic.main.activity_product_list.*
 import kotlinx.android.synthetic.main.content_product_list.*
+import kotlinx.android.synthetic.main.product_list_item.view.*
 
 
-class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView.OnItemSelectedListener {
+class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView.OnItemSelectedListener,
+        SwipeRefreshLayout.OnRefreshListener {
+    override fun changeActivityToProduct(product: Post) {
+        var intent = Intent(this, ProductActivity::class.java)
+
+        var gson = Gson()
+        intent.putExtra("product", gson.toJson(product))
+
+        startActivity(intent)
+    }
+
+    override fun endRefresh() {
+        swipeRefreshLayout!!.isRefreshing = false
+    }
+
+    override fun onRefresh() {
+        Log.d("my_tag", "refresh")
+        productListPresenter.productListRefresh()
+    }
+
+    private val swipeRefreshLayout: SwipeRefreshLayout? = null
+        get() {
+            if (field == null) {
+                field = swiperefresh
+                setRefreshListener()
+            }
+
+            return field
+        }
+
+    private fun setRefreshListener() {
+        swipeRefreshLayout!!.setOnRefreshListener(this)
+    }
+
     override fun updateProductList(data: List<Post>) {
         Log.d("UPDATE PRODUCT LIST", "INVOKE")
         data.forEach { theme -> Log.d("UPDATE PRODUCT LIST", theme.name) }
         productData.clear()
         productData = data.toMutableList()
-        //mRecyclerView!!.adapter.notifyDataSetChanged()
-        mRecyclerView!!.adapter = ProductRecyclerViewAdapter(productData)
+        mRecyclerView!!.adapter = ProductRecyclerViewAdapter(productData, myListener)
         mRecyclerView!!.adapter.notifyDataSetChanged()
     }
 
@@ -52,8 +88,9 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
     private val rvAdapter: RecyclerView.Adapter<*>? = null
         get() {
             if (field == null) {
-                field = ProductRecyclerViewAdapter(productData)
+                field = ProductRecyclerViewAdapter(productData, myListener)
             }
+
 
             return field
         }
@@ -81,7 +118,6 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
         this.data.clear()
         data.forEach { item -> this.data.add(item) }
         var index = data.indexOf(selectedItem)
-
 
         adapter!!.notifyDataSetChanged()
         spinner!!.setSelection(index)
@@ -153,6 +189,12 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_list)
         Log.d("ProductListActivity", "Invoke")
+        swipeRefreshLayout
+    }
+
+    private val myListener = View.OnClickListener { v ->
+        Log.d("Button", "CLICK")
+        productListPresenter.newTopicSelected(v.product_name_text_view.text.toString())
     }
 
 }

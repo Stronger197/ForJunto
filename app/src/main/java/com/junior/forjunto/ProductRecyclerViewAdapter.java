@@ -1,7 +1,6 @@
 package com.junior.forjunto;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,16 +14,12 @@ import java.util.List;
 
 public class ProductRecyclerViewAdapter extends RecyclerView.Adapter<ProductRecyclerViewAdapter.ViewHolder> {
     private List<Post> mDataset;
+    private View.OnClickListener clickListener;
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public ProductRecyclerViewAdapter(List<Post> myDataset) {
+    public ProductRecyclerViewAdapter(List<Post> myDataset, View.OnClickListener listener) {
+        clickListener = listener;
         mDataset = myDataset;
-    }
-
-    public void updateReceiptsList(List<Post> newlist) {
-        mDataset.clear();
-        mDataset.addAll(newlist);
-        this.notifyDataSetChanged();
     }
 
     // Create new views (invoked by the layout manager)
@@ -33,7 +28,7 @@ public class ProductRecyclerViewAdapter extends RecyclerView.Adapter<ProductRecy
         // create a new view
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.product_list_item, parent, false);
         // set the view's size, margins, paddings and layout parameters
-        ViewHolder vh = new ViewHolder(v);
+        ViewHolder vh = new ViewHolder(v, clickListener);
         return vh;
     }
 
@@ -66,14 +61,9 @@ public class ProductRecyclerViewAdapter extends RecyclerView.Adapter<ProductRecy
         public TextView productDescriptionTextView;
         public TextView upvotesTextView;
 
-        public ViewHolder(View v) {
+        public ViewHolder(View v, View.OnClickListener listener) {
             super(v);
-            v.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d("CLICK", "INVOKE");
-                }
-            });
+            v.setOnClickListener(listener);
             productImageView = v.findViewById(R.id.product_image);
             productNameTextView = v.findViewById(R.id.product_name_text_view);
             productDescriptionTextView = v.findViewById(R.id.product_description_text_view);

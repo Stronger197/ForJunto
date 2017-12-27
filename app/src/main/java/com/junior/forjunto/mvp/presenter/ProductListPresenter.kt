@@ -10,19 +10,29 @@ import com.junior.forjunto.mvp.view.ProductListView
 @InjectViewState
 class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresenter {
     override fun productListUpdated(data: ProductHuntProductsApiResponse, name: String) {
-        data.posts?.forEach { product -> Log.d("Product", product.name) }
+
 
         if (productMap == null) productMap = mutableMapOf()
 
-
-        productMap!!.put(name, data)
-
+        data.posts?.forEach { product ->
+            Log.d("Product1", product.name)
+            productMap!!.put(product.name!!, product)
+        }
 
         viewState.updateProductList(data.posts!!)
+        viewState.endRefresh()
+    }
+
+    fun newTopicSelected(topicName: String) {
+        Log.d("NEW TOPIC SELECTED", topicName)
+        Log.d("NEW TOPIC SELECTED", productMap.toString())
+        Log.d("NEW TOPIC SELECTED", productMap!!.toString())
+        viewState.changeActivityToProduct(productMap!![topicName]!!)
     }
 
     fun newCategorySelected(categoryName: String) {
 
+        selectedCategory = categoryName
         Log.d("NEW CATEGORY SELECTED", "________________________________START_______________________________")
         Log.d("NEW CATEGORY SELECTED", "Category Name $categoryName")
         Log.d("NEW CATEGORY SELECTED", "Category Name from topic ${topicsMap!!.get(categoryName)!!.slug}")
@@ -31,6 +41,12 @@ class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresen
 
         productListModel.updateProducts(topicsMap!!.get(categoryName)!!.slug!!)
     }
+
+    fun productListRefresh() {
+        productListModel.updateProducts(topicsMap!!.get(selectedCategory)!!.slug!!)
+    }
+
+    private var selectedCategory = "Tech"
 
     override fun topicListUpdatingError() {
         // TODO show error message
@@ -41,7 +57,7 @@ class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresen
     }
 
     var topicsMap: MutableMap<String, Topic>? = null
-    var productMap: MutableMap<String, ProductHuntProductsApiResponse>? = null
+    var productMap: MutableMap<String, Post>? = null
 
     private var topicListModel: DataUsage = DataUsage(this)
     private var productListModel: ProductDataUsage = ProductDataUsage(this)

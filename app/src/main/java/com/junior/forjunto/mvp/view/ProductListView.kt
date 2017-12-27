@@ -10,4 +10,6 @@ interface ProductListView : MvpView {
     fun showAppbarProgressBar()
     fun hideAppbarProgressBar()
     fun updateProductList(data: List<Post>)
+    fun endRefresh()
+    fun changeActivityToProduct(product: Post)
 }
