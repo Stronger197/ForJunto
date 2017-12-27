@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="false"
+    android:orientation="horizontal"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="8dp">
+
+    <RelativeLayout
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:clickable="false">
+
+        <ImageView
+            android:id="@+id/product_image"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:clickable="false"
+            android:src="@android:drawable/ic_delete" />
+
+
+        <RelativeLayout
+            android:layout_width="63dp"
+            android:layout_height="18dp"
+            android:layout_marginTop="8dp"
+            android:clickable="false">
+
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimary"
+                android:clickable="false"></View>
+
+            <TextView
+                android:id="@+id/upvotes_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:gravity="fill_horizontal"
+                android:textAlignment="center"
+                android:textColor="@android:color/white"
+                android:textSize="12dp" />
+
+        </RelativeLayout>
+
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="false"
+        android:orientation="vertical"
+        android:paddingBottom="16dp"
+        android:paddingLeft="8dp"
+        android:paddingTop="24dp">
+
+        <TextView
+            android:id="@+id/product_name_text_view"
+            style="@style/TextAppearance.AppCompat.Medium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:lines="1"
+            android:paddingBottom="8dp"
+            android:text="askldjaslkdjlaksjdlasjd"
+            android:textColor="#676767"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/product_description_text_view"
+            style="@style/TextAppearance.AppCompat.Medium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:lines="1"
+            android:text="another"
+            android:textColor="#676767"
+            android:textStyle="normal" />
+    </LinearLayout>
+
+
+</LinearLayout>

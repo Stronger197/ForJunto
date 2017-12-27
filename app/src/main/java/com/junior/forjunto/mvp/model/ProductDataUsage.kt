@@ -88,7 +88,7 @@ class ProductDataUsage(productListPresenter: ProductListPresenter) {
 
         if (c.moveToFirst()) {
             val data = gson.fromJson("{posts=${c.getString(0)}}", ProductHuntProductsApiResponse::class.java)
-            productListPresenterInterface?.productListUpdated(data)
+            productListPresenterInterface?.productListUpdated(data, category)
         } else
             Log.d(TAG, "0 rows")
 

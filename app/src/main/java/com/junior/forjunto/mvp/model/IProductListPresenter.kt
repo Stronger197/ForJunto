@@ -7,5 +7,5 @@ interface IProductListPresenter {
     fun topicListUpdated(data: List<Topic>)
     fun topicListUpdating()
     fun topicListUpdatingError()
-    fun productListUpdated(data: ProductHuntProductsApiResponse)
+    fun productListUpdated(data: ProductHuntProductsApiResponse, name: String)
 }

@@ -9,10 +9,28 @@ import com.junior.forjunto.mvp.view.ProductListView
 
 @InjectViewState
 class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresenter {
-    override fun productListUpdated(data: ProductHuntProductsApiResponse) {
+    override fun productListUpdated(data: ProductHuntProductsApiResponse, name: String) {
         data.posts?.forEach { product -> Log.d("Product", product.name) }
+
+        if (productMap == null) productMap = mutableMapOf()
+
+
+        productMap!!.put(name, data)
+
+
+        viewState.updateProductList(data.posts!!)
     }
 
+    fun newCategorySelected(categoryName: String) {
+
+        Log.d("NEW CATEGORY SELECTED", "________________________________START_______________________________")
+        Log.d("NEW CATEGORY SELECTED", "Category Name $categoryName")
+        Log.d("NEW CATEGORY SELECTED", "Category Name from topic ${topicsMap!!.get(categoryName)!!.slug}")
+        Log.d("NEW CATEGORY SELECTED", "________________________________END_______________________________")
+        productListModel.getProductListFromCache(topicsMap!!.get(categoryName)!!.slug!!)
+
+        productListModel.updateProducts(topicsMap!!.get(categoryName)!!.slug!!)
+    }
 
     override fun topicListUpdatingError() {
         // TODO show error message
@@ -23,6 +41,7 @@ class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresen
     }
 
     var topicsMap: MutableMap<String, Topic>? = null
+    var productMap: MutableMap<String, ProductHuntProductsApiResponse>? = null
 
     private var topicListModel: DataUsage = DataUsage(this)
     private var productListModel: ProductDataUsage = ProductDataUsage(this)
@@ -42,8 +61,6 @@ class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresen
         topicListModel.getTopicListFromCache() // init topics from cache if device offline
 
         topicListModel.updateTopics() // trying get topics from web
-
-        productListModel.updateProducts("tech")
     }
 
 
