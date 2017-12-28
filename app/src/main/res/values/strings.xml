@@ -1,10 +1,8 @@
 <resources>
     <string name="app_name">ForJunto</string>
     <string name="title_activity_main">MainActivity</string>
-
-    <string-array name="categoriesSpinnerAdapter">
-        <item>"first"</item>
-        <item>"second"</item>
-        <item>"third"</item>
-    </string-array>
+    <string name="upvote">Upvote %d</string>
+    <string name="productimage">ProductImage</string>
+    <string name="get_it">Get it</string>
+    <string name="product_thumbnail">Product thumbnail</string>
 </resources>

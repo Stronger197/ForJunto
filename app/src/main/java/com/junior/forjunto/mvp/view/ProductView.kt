@@ -8,4 +8,6 @@ interface ProductView : MvpView {
     fun setDescription(description: String)
     fun setName(name: String)
     fun setUpvotes(num: Int)
+    fun setAppbarTitle(title: String)
+    fun openWebPage(url: String)
 }

@@ -38,7 +38,7 @@ class DataUsage(productListPresenter: ProductListPresenter) {
     // When is done all data caches in local database
     private fun getTopics() {
         Log.d(TAG, "getTopics Invoke")
-        productListPresenterInterface!!.topicListUpdating()
+        productListPresenterInterface!!.categoryListUpdating()
         getApi().getData("Bearer " + productHuntToken).enqueue(object : Callback<ProductHuntTopicsApiResponse> {
             override fun onResponse(call: Call<ProductHuntTopicsApiResponse>, response: Response<ProductHuntTopicsApiResponse>) {
                 val body = response.body()
@@ -78,10 +78,9 @@ class DataUsage(productListPresenter: ProductListPresenter) {
     // function to get list of Topics from cache
     fun getTopicListFromCache() {
         val gson = Gson()
-        Log.d("DB", "GET TOPIC LIST INOVKE")
         val db = getDbHelper().writableDatabase
         val c = db.query("Topics", arrayOf("obj"), null, null, null, null, null)
-        var data = mutableListOf<Topic>()
+        val data = mutableListOf<Topic>()
         if (c.moveToFirst()) {
             do {
                 Log.d(TAG, "Obj: " + c.getString(0))
@@ -93,7 +92,7 @@ class DataUsage(productListPresenter: ProductListPresenter) {
         c.close()
         db.close()
 
-        productListPresenterInterface!!.topicListUpdated(data)
+        productListPresenterInterface!!.categoryListUpdated(data)
     }
 
 
@@ -123,8 +122,6 @@ class DataUsage(productListPresenter: ProductListPresenter) {
     internal inner class DBHelper(context: Context) : SQLiteOpenHelper(context, "ProducthuntDB", null, 1) {
 
         override fun onCreate(db: SQLiteDatabase) {
-            Log.d(TAG, "--- onCreate database ---")
-
             db.execSQL("CREATE TABLE Topics ( id text primary key, obj text);")
             db.execSQL("CREATE TABLE Products ( id text primary key, obj text);")
         }

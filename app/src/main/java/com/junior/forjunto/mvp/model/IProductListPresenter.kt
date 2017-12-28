@@ -1,11 +1,9 @@
 package com.junior.forjunto.mvp.model
 
-/**
- * Created by stronger197 on 12/25/17.
- */
 interface IProductListPresenter {
-    fun topicListUpdated(data: List<Topic>)
-    fun topicListUpdating()
+    fun categoryListUpdated(data: List<Topic>)
+    fun categoryListUpdating()
     fun topicListUpdatingError()
     fun productListUpdated(data: ProductHuntProductsApiResponse, name: String)
+    fun productListUpdateError()
 }

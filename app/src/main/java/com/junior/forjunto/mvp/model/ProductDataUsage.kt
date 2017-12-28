@@ -46,13 +46,13 @@ class ProductDataUsage(productListPresenter: ProductListPresenter) {
                 if (body != null) {
                     cacheProductsList(body.posts, category)
                 } else {
-                    // TODO ERROR
+                    productListPresenterInterface!!.productListUpdateError()
                 }
             }
 
             override fun onFailure(call: Call<ProductHuntProductsApiResponse>, t: Throwable) {
                 Log.d(TAG, "error: " + t.message)
-                // TODO ERROR
+                productListPresenterInterface!!.productListUpdateError()
             }
         })
     }
@@ -70,7 +70,7 @@ class ProductDataUsage(productListPresenter: ProductListPresenter) {
             val sqlEscapeObj = DatabaseUtils.sqlEscapeString(gson.toJson(posts))
             db.execSQL("replace into Products (id, obj) values ($sqlEscapeId ,$sqlEscapeObj);")
         } else {
-            // TODO ERROR
+            productListPresenterInterface!!.productListUpdateError()
         }
 
         db.close()
@@ -80,10 +80,7 @@ class ProductDataUsage(productListPresenter: ProductListPresenter) {
 
     fun getProductListFromCache(category: String) {
         val gson = Gson()
-        Log.d("DB", "GET POST LIST INOVKE")
         val db = getDbHelper().writableDatabase
-        val sqlEscapeObj = DatabaseUtils.sqlEscapeString("\"$category\"")
-        Log.d(TAG, "sqlEscapeObj: " + sqlEscapeObj)
         val c = db.query("Products", arrayOf("obj"), "id == \"" + category + "\"", null, null, null, null)
 
         if (c.moveToFirst()) {
@@ -124,8 +121,6 @@ class ProductDataUsage(productListPresenter: ProductListPresenter) {
     internal inner class DBHelper(context: Context) : SQLiteOpenHelper(context, "ProducthuntDB", null, 1) {
 
         override fun onCreate(db: SQLiteDatabase) {
-            Log.d(TAG, "--- onCreate database ---")
-
             db.execSQL("CREATE TABLE Topics ( id text primary key, obj text);")
             db.execSQL("CREATE TABLE Products ( id text primary key, obj text);")
         }
