@@ -15,7 +15,7 @@ class ProductPresenter : MvpPresenter<ProductView>() {
 
     override fun onFirstViewAttach() {
         super.onFirstViewAttach()
-        viewState.getDataFromIntent()
+        viewState.getDataFromIntent() // getting data from intent, on finish will call saveProduct function
     }
 
     fun saveProduct(product: Post) {

@@ -26,43 +26,50 @@ class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresen
     private var productMap: MutableMap<String, Post>? = null
 
     init {
+        // getting selected category from cache if cache empty will selected "Tech"
         selectedCategory = preferencesModel.getSelectedCategory()
     }
 
     override fun onFirstViewAttach() {
         super.onFirstViewAttach()
 
-        // get user category from cache and from internet and call category list updated
+        // getting category list from cache and from server
+        // on finish will call productListUpdated method
         topicListModel.getTopicListFromCache()
         topicListModel.updateTopics()
 
     }
 
+    // This method will be called after data in cache successfully updated
     override fun productListUpdated(data: ProductHuntProductsApiResponse, name: String) {
         if (productMap == null) productMap = mutableMapOf()
         data.posts?.forEach { product ->
             productMap!!.put(product.name!!, product)
         }
-        viewState.updateProductList(data.posts!!)
-        viewState.endRefresh()
+        viewState.updateProductList(data.posts!!)   // update category spinner in toolbar
+        viewState.endRefresh()   // hide progress bar
     }
 
+    // invoke this function when user select a product
     fun newTopicSelected(topicName: String) {
         viewState.changeActivityToProduct(productMap!![topicName]!!)
     }
 
+    // This method will be called if the product list has not been updated
     override fun productListUpdateError() {
         viewState.endRefresh()
         viewState.showSnackBarMessage("Error while updating list, please check your internet connection")
     }
 
+    // invoke this function when the user select a category
     fun newCategorySelected(categoryName: String) {
         selectedCategory = categoryName
         preferencesModel.setSelectedCategory(selectedCategory)
-        productListModel.getProductListFromCache(categoriesMap[categoryName]!!.slug!!)
-        productListModel.updateProducts(categoriesMap[categoryName]!!.slug!!)
+        productListModel.getProductListFromCache(categoriesMap[categoryName]!!.slug!!) // getting product list from cache if it possible
+        productListModel.updateProducts(categoriesMap[categoryName]!!.slug!!) // getting product list from server
     }
 
+    // invoke this function when you need to update the list of products
     fun productListRefresh() {
         if (categoriesMap[selectedCategory] != null) {
             productListModel.updateProducts(categoriesMap[selectedCategory]!!.slug!!)
@@ -75,10 +82,12 @@ class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresen
         // TODO show error message
     }
 
+    // this function will be called when the category list will updating
     override fun categoryListUpdating() {
         viewState.showAppbarProgressBar()
     }
 
+    // this function will be called when the category list will updated
     override fun categoryListUpdated(data: List<Topic>) {
         categoriesMap.clear()
         data.forEach { category -> categoriesMap.put(category.name!!, category) }

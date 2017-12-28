@@ -28,14 +28,13 @@ class DataUsage(productListPresenter: ProductListPresenter) {
         productListPresenterInterface = productListPresenter
     }
 
-    // this function get topics from product hunt api, cache it in memory
-    // When is done function invoke callback from presenter class
+    // invoke this function if you want update category list from server
     fun updateTopics() {
         getTopics()
     }
 
-    // This function using product hunt API to get list of topics
-    // When is done all data caches in local database
+    // this function getting topics from product hunt api, cache it in memory
+    // When is done function invoke callback from presenter class
     private fun getTopics() {
         Log.d(TAG, "getTopics Invoke")
         productListPresenterInterface!!.categoryListUpdating()
@@ -61,6 +60,7 @@ class DataUsage(productListPresenter: ProductListPresenter) {
     // Saving topics data in cache
     // key: topic name (slug)
     // value: Topic object
+    // and call callback
     private fun cacheTopicList(topics: List<Topic>) {
         val db = getDbHelper().writableDatabase
         val gson = Gson()
@@ -76,6 +76,7 @@ class DataUsage(productListPresenter: ProductListPresenter) {
     }
 
     // function to get list of Topics from cache
+    // invoke this function if you want update category list from cache
     fun getTopicListFromCache() {
         val gson = Gson()
         val db = getDbHelper().writableDatabase

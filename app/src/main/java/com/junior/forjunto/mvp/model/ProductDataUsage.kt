@@ -28,15 +28,14 @@ class ProductDataUsage(productListPresenter: ProductListPresenter) {
     }
 
 
-    // this function get products from producthunt api, cache it in memory
-    // When is done function invoke callback from presenter class
+    // invoke this function if you want update product list from server
     fun updateProducts(category: String) {
         getProducts(category)
     }
 
 
-    // This function using product hunt API to get list of topics
-    // When is done all data caches in local database
+    // this function getting products from producthunt api, cache it in memory
+    // When is done function invoke callback from presenter class
     private fun getProducts(category: String) {
         getApi().getData("Bearer " + productHuntToken, category).enqueue(object : Callback<ProductHuntProductsApiResponse> {
             override fun onResponse(call: Call<ProductHuntProductsApiResponse>, response: Response<ProductHuntProductsApiResponse>) {
@@ -60,7 +59,8 @@ class ProductDataUsage(productListPresenter: ProductListPresenter) {
 
     // Saving topics data in cache
     // key: topic name (slug)
-    // value: Topic object
+    // value: List of Products object
+    // and call callback
     private fun cacheProductsList(posts: List<Post>?, category: String) {
         val db = getDbHelper().writableDatabase
         val gson = Gson()
@@ -78,6 +78,8 @@ class ProductDataUsage(productListPresenter: ProductListPresenter) {
     }
 
 
+    // function to get list of Products by category from cache
+    // invoke this function if you want update product list from cache
     fun getProductListFromCache(category: String) {
         val gson = Gson()
         val db = getDbHelper().writableDatabase

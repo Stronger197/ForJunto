@@ -16,13 +16,14 @@ class PreferencesUsage {
             return field
         }
 
-
+    // cache a selected category
     fun setSelectedCategory(categoryName: String) {
         val editor = sharedPreferences!!.edit()
         editor.putString("category", categoryName)
         editor.apply()
     }
 
+    // get category from cache
     fun getSelectedCategory(): String {
         return sharedPreferences!!.getString("category", "Tech")
     }

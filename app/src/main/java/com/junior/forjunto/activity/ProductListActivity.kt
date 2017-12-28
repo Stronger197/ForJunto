@@ -108,6 +108,7 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
         productListPresenter.productListRefresh()
     }
 
+    // update a list of products
     override fun updateProductList(data: List<Post>) {
         data.forEach { theme -> Log.d("Products", theme.name) }
         productData.clear()
@@ -116,6 +117,7 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
         mRecyclerView!!.adapter.notifyDataSetChanged()
     }
 
+    // show an snackbar with message
     override fun showSnackBarMessage(message: String) {
         Snackbar.make(layout_product_list, message, Snackbar.LENGTH_LONG).setAction("Ok", null).show()
     }
@@ -134,6 +136,7 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
         progressBar!!.visibility = View.GONE
     }
 
+    // update a categories list
     override fun updateTopicList(data: Set<String>) {
 
         val selectedItem: String = if (spinner!!.selectedItem != null) {
@@ -154,6 +157,7 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
         // TODO on nothing selected
     }
 
+    // this method will be called when new category selected
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         productListPresenter.newCategorySelected(spinner!!.selectedItem.toString())
     }

@@ -30,6 +30,7 @@ class ProductActivity : MvpAppCompatActivity(), ProductView {
     private var nameTV: TextView? = null
     private var upvoteTV: TextView? = null
     private var getItButton: Button? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product)
@@ -74,11 +75,8 @@ class ProductActivity : MvpAppCompatActivity(), ProductView {
 
     override fun openWebPage(url: String) {
         val builder = CustomTabsIntent.Builder()
-        //builder.setSession(session)
         builder.setToolbarColor(ResourcesCompat.getColor(resources, R.color.colorPrimary, null))
-// Application exit animation, Chrome enter animation.
         builder.setStartAnimations(this, R.anim.slide_in_right, R.anim.slide_out_left)
-// vice versa
         builder.setExitAnimations(this, R.anim.slide_in_left, R.anim.slide_out_right)
 
         val customTabsIntent = builder.build()
