@@ -35,8 +35,8 @@ class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresen
 
         // getting category list from cache and from server
         // on finish will call productListUpdated method
-        topicListModel.getTopicListFromCache()
-        topicListModel.updateTopics()
+        topicListModel.getCategoriesListFromCache()
+        topicListModel.updateCategories()
 
     }
 
@@ -74,11 +74,11 @@ class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresen
         if (categoriesMap[selectedCategory] != null) {
             productListModel.updateProducts(categoriesMap[selectedCategory]!!.slug!!)
         } else {
-            topicListModel.updateTopics()
+            topicListModel.updateCategories()
         }
     }
 
-    override fun topicListUpdatingError() {
+    override fun categoryListUpdatingError() {
         // TODO show error message
     }
 

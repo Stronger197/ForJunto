@@ -29,14 +29,14 @@ class DataUsage(productListPresenter: ProductListPresenter) {
     }
 
     // invoke this function if you want update category list from server
-    fun updateTopics() {
-        getTopics()
+    fun updateCategories() {
+        getCategories()
     }
 
     // this function getting topics from product hunt api, cache it in memory
     // When is done function invoke callback from presenter class
-    private fun getTopics() {
-        Log.d(TAG, "getTopics Invoke")
+    private fun getCategories() {
+        Log.d(TAG, "getCategories Invoke")
         productListPresenterInterface!!.categoryListUpdating()
         getApi().getData("Bearer " + productHuntToken).enqueue(object : Callback<ProductHuntTopicsApiResponse> {
             override fun onResponse(call: Call<ProductHuntTopicsApiResponse>, response: Response<ProductHuntTopicsApiResponse>) {
@@ -44,15 +44,15 @@ class DataUsage(productListPresenter: ProductListPresenter) {
                 Log.d(TAG, "Response CODE: " + response.code())
                 Log.d(TAG, "Response Body: " + response.body().toString())
                 if (body != null) {
-                    cacheTopicList(body.topics!!)
+                    cacheCategoriesList(body.topics!!)
                 } else {
-                    productListPresenterInterface!!.topicListUpdatingError()
+                    productListPresenterInterface!!.categoryListUpdatingError()
                 }
             }
 
             override fun onFailure(call: Call<ProductHuntTopicsApiResponse>, t: Throwable) {
                 Log.d(TAG, "error: " + t.message)
-                productListPresenterInterface!!.topicListUpdatingError()
+                productListPresenterInterface!!.categoryListUpdatingError()
             }
         })
     }
@@ -61,7 +61,7 @@ class DataUsage(productListPresenter: ProductListPresenter) {
     // key: topic name (slug)
     // value: Topic object
     // and call callback
-    private fun cacheTopicList(topics: List<Topic>) {
+    private fun cacheCategoriesList(topics: List<Topic>) {
         val db = getDbHelper().writableDatabase
         val gson = Gson()
 
@@ -72,12 +72,12 @@ class DataUsage(productListPresenter: ProductListPresenter) {
         }
 
         db.close()
-        getTopicListFromCache()
+        getCategoriesListFromCache()
     }
 
     // function to get list of Topics from cache
     // invoke this function if you want update category list from cache
-    fun getTopicListFromCache() {
+    fun getCategoriesListFromCache() {
         val gson = Gson()
         val db = getDbHelper().writableDatabase
         val c = db.query("Topics", arrayOf("obj"), null, null, null, null, null)
