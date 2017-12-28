@@ -6,5 +6,5 @@
     android:layout_height="wrap_content"
     android:drawableEnd="@drawable/ic_arrow_drop_down_white_24dp"
     android:padding="16dp"
-    android:textColor="@android:color/white"
+    android:textColor="@color/text_light"
     android:textStyle="bold" />

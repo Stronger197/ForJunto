@@ -43,7 +43,7 @@
                 android:clickable="false"
                 android:gravity="fill_horizontal"
                 android:textAlignment="center"
-                android:textColor="@android:color/white"
+                android:textColor="@color/text_light"
                 android:textSize="12sp" />
 
         </RelativeLayout>
@@ -69,7 +69,7 @@
             android:clickable="false"
             android:lines="1"
             android:paddingBottom="8dp"
-            android:textColor="#676767"
+            android:textColor="@color/text_dark"
             android:textStyle="bold" />
 
         <TextView
@@ -79,7 +79,7 @@
             android:layout_height="wrap_content"
             android:clickable="false"
             android:lines="1"
-            android:textColor="#676767"
+            android:textColor="@color/text_dark"
             android:textStyle="normal" />
     </LinearLayout>
 
