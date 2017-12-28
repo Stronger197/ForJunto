@@ -46,6 +46,7 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
 
                 field!!.onItemSelectedListener = this
 
+
             }
             return field as Spinner
         }
