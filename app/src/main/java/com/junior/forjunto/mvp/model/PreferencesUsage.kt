@@ -1,20 +1,12 @@
 package com.junior.forjunto.mvp.model
 
 import android.content.Context
-import android.content.SharedPreferences
 import com.junior.forjunto.App
 
 
-class PreferencesUsage {
+object PreferencesUsage {
 
-    private var sharedPreferences: SharedPreferences? = null
-        get() {
-            if (field == null) {
-                field = App.getContextApp().getSharedPreferences("preferences", Context.MODE_PRIVATE)
-            }
-
-            return field
-        }
+    private val sharedPreferences = App.getContextApp().getSharedPreferences("preferences", Context.MODE_PRIVATE)
 
     // cache a selected category
     fun setSelectedCategory(categoryName: String) {

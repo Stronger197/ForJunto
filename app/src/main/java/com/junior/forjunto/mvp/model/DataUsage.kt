@@ -8,7 +8,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.junior.forjunto.App
 import com.junior.forjunto.mvp.presenter.ProductListPresenter
-import com.junior.forjunto.network.ProductHuntTopicsApi
+import com.junior.forjunto.network.ProductHuntApi
 import com.junior.forjunto.productHuntToken
 import retrofit2.Call
 import retrofit2.Callback
@@ -20,8 +20,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 class DataUsage(productListPresenter: ProductListPresenter) {
     private val TAG: String = "Producthunt API"
     private var productListPresenterInterface: IProductListPresenter? = null
-    private var productHuntTopicsApi: ProductHuntTopicsApi? = null
-    private var retrofit: Retrofit? = null
     private var dbHelper: DBHelper? = null
 
     init {
@@ -38,7 +36,7 @@ class DataUsage(productListPresenter: ProductListPresenter) {
     private fun getCategories() {
         Log.d(TAG, "getCategories Invoke")
         productListPresenterInterface!!.categoryListUpdating()
-        getApi().getData("Bearer " + productHuntToken).enqueue(object : Callback<ProductHuntTopicsApiResponse> {
+        getApi().getTopics("Bearer " + productHuntToken).enqueue(object : Callback<ProductHuntTopicsApiResponse> {
             override fun onResponse(call: Call<ProductHuntTopicsApiResponse>, response: Response<ProductHuntTopicsApiResponse>) {
                 val body = response.body()
                 Log.d(TAG, "Response CODE: " + response.code())
@@ -52,6 +50,7 @@ class DataUsage(productListPresenter: ProductListPresenter) {
 
             override fun onFailure(call: Call<ProductHuntTopicsApiResponse>, t: Throwable) {
                 Log.d(TAG, "error: " + t.message)
+                Log.d("TEST", "ERROR FROM DATAUSAGE");
                 productListPresenterInterface!!.categoryListUpdatingError()
             }
         })
@@ -101,23 +100,22 @@ class DataUsage(productListPresenter: ProductListPresenter) {
         if (dbHelper == null) {
             dbHelper = DBHelper(App.getContextApp())
         }
+
         return dbHelper as DBHelper
     }
 
     // returns interface to work with producthunt API
-    private fun getApi(): ProductHuntTopicsApi {
-        if (retrofit == null) {
-            retrofit = Retrofit.Builder()
+    private fun getApi(): ProductHuntApi {
+
+
+
+          val retrofit = Retrofit.Builder()
                     .baseUrl("https://api.producthunt.com")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
-        }
 
-        if (productHuntTopicsApi == null) {
-            productHuntTopicsApi = retrofit!!.create<ProductHuntTopicsApi>(ProductHuntTopicsApi::class.java)
-        }
 
-        return productHuntTopicsApi!!
+        return retrofit!!.create(ProductHuntApi::class.java)
     }
 
     internal inner class DBHelper(context: Context) : SQLiteOpenHelper(context, "ProducthuntDB", null, 1) {

@@ -9,17 +9,13 @@ import retrofit2.http.Header
 import retrofit2.http.Path
 
 
-interface ProductHuntTopicsApi {
+interface ProductHuntApi {
 
     @GET("/v1/topics?search%5Btrending%5D=true")
-    fun getData(@Header("Authorization") authorization: String): Call<ProductHuntTopicsApiResponse>
+    fun getTopics(@Header("Authorization") authorization: String): Call<ProductHuntTopicsApiResponse>
 
-}
-
-
-interface ProductHuntProductsApi {
 
     @GET("/v1/categories/{category}/posts")
-    fun getData(@Header("Authorization") authorization: String, @Path("category") categoryName: String): Call<ProductHuntProductsApiResponse>
+    fun getProducts(@Header("Authorization") authorization: String, @Path("category") categoryName: String): Call<ProductHuntProductsApiResponse>
 
 }

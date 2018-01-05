@@ -7,8 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import com.google.gson.Gson
 import com.junior.forjunto.App
-import com.junior.forjunto.mvp.presenter.ProductListPresenter
-import com.junior.forjunto.network.ProductHuntProductsApi
+import com.junior.forjunto.network.ProductHuntApi
 import com.junior.forjunto.productHuntToken
 import retrofit2.Call
 import retrofit2.Callback
@@ -16,16 +15,9 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class ProductDataUsage(productListPresenter: ProductListPresenter) {
+class ProductDataUsage(val productListPresenter: IProductListPresenter) {
     private val TAG: String = "Producthunt Products"
-    private var productListPresenterInterface: IProductListPresenter? = null
-    private var productHuntProductsApi: ProductHuntProductsApi? = null
-    private var retrofit: Retrofit? = null
-    private var dbHelper: DBHelper? = null
-
-    init {
-        productListPresenterInterface = productListPresenter
-    }
+    private var dbHelper = DBHelper(App.getContextApp())
 
 
     // invoke this function if you want update product list from server
@@ -37,7 +29,7 @@ class ProductDataUsage(productListPresenter: ProductListPresenter) {
     // this function getting products from producthunt api, cache it in memory
     // When is done function invoke callback from presenter class
     private fun getProducts(category: String) {
-        getApi().getData("Bearer " + productHuntToken, category).enqueue(object : Callback<ProductHuntProductsApiResponse> {
+        getApi().getProducts("Bearer " + productHuntToken, category).enqueue(object : Callback<ProductHuntProductsApiResponse> {
             override fun onResponse(call: Call<ProductHuntProductsApiResponse>, response: Response<ProductHuntProductsApiResponse>) {
                 val body = response.body()
                 Log.d(TAG, "Response CODE: " + response.code())
@@ -45,13 +37,14 @@ class ProductDataUsage(productListPresenter: ProductListPresenter) {
                 if (body != null) {
                     cacheProductsList(body.posts, category)
                 } else {
-                    productListPresenterInterface!!.productListUpdateError()
+                    productListPresenter.productListUpdateError()
                 }
             }
 
             override fun onFailure(call: Call<ProductHuntProductsApiResponse>, t: Throwable) {
                 Log.d(TAG, "error: " + t.message)
-                productListPresenterInterface!!.productListUpdateError()
+                Log.d("TEST", "ERROR");
+                productListPresenter.productListUpdateError()
             }
         })
     }
@@ -62,7 +55,7 @@ class ProductDataUsage(productListPresenter: ProductListPresenter) {
     // value: List of Products object
     // and call callback
     private fun cacheProductsList(posts: List<Post>?, category: String) {
-        val db = getDbHelper().writableDatabase
+        val db = dbHelper.writableDatabase
         val gson = Gson()
 
         if (posts != null) {
@@ -70,7 +63,7 @@ class ProductDataUsage(productListPresenter: ProductListPresenter) {
             val sqlEscapeObj = DatabaseUtils.sqlEscapeString(gson.toJson(posts))
             db.execSQL("replace into Products (id, obj) values ($sqlEscapeId ,$sqlEscapeObj);")
         } else {
-            productListPresenterInterface!!.productListUpdateError()
+            productListPresenter.productListUpdateError()
         }
 
         db.close()
@@ -82,12 +75,12 @@ class ProductDataUsage(productListPresenter: ProductListPresenter) {
     // invoke this function if you want update product list from cache
     fun getProductListFromCache(category: String) {
         val gson = Gson()
-        val db = getDbHelper().writableDatabase
+        val db = dbHelper.writableDatabase
         val c = db.query("Products", arrayOf("obj"), "id == \"" + category + "\"", null, null, null, null)
 
         if (c.moveToFirst()) {
             val data = gson.fromJson("{posts=${c.getString(0)}}", ProductHuntProductsApiResponse::class.java)
-            productListPresenterInterface?.productListUpdated(data, category)
+            productListPresenter.productListUpdated(data, category)
         } else
             Log.d(TAG, "0 rows")
 
@@ -96,28 +89,17 @@ class ProductDataUsage(productListPresenter: ProductListPresenter) {
         db.close()
     }
 
-
-    private fun getDbHelper(): DBHelper {
-        if (dbHelper == null) {
-            dbHelper = DBHelper(App.getContextApp())
-        }
-        return dbHelper as DBHelper
-    }
-
     // returns interface to work with producthunt API
-    private fun getApi(): ProductHuntProductsApi {
-        if (retrofit == null) {
-            retrofit = Retrofit.Builder()
+    private fun getApi(): ProductHuntApi {
+
+           val retrofit = Retrofit.Builder()
                     .baseUrl("https://api.producthunt.com")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
-        }
 
-        if (productHuntProductsApi == null) {
-            productHuntProductsApi = retrofit!!.create<ProductHuntProductsApi>(ProductHuntProductsApi::class.java)
-        }
 
-        return productHuntProductsApi!!
+
+        return retrofit!!.create(ProductHuntApi::class.java)
     }
 
     internal inner class DBHelper(context: Context) : SQLiteOpenHelper(context, "ProducthuntDB", null, 1) {

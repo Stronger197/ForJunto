@@ -13,7 +13,6 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ProgressBar
-import android.widget.Spinner
 import com.arellomobile.mvp.MvpAppCompatActivity
 import com.arellomobile.mvp.presenter.InjectPresenter
 import com.google.gson.Gson
@@ -33,34 +32,21 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
     @InjectPresenter
     lateinit var productListPresenter: ProductListPresenter
 
-    private var spinner: Spinner? = null
-        get() {
-            if (field == null) {
-                field = categorySpinner
-                // do this for each of your text views
-                field!!.adapter = adapter
-                // заголовок
-                field!!.prompt = "Tech"
-
-                field!!.setSelection(0)
-
-                field!!.onItemSelectedListener = this
-
-
-            }
-            return field as Spinner
+    private val spinner by lazy {
+        categorySpinner.apply {
+            adapter = this@ProductListActivity.adapter
+            prompt = "Tech"
+            setSelection(0)
+            onItemSelectedListener = this@ProductListActivity
         }
+    }
 
-    private var adapter: ArrayAdapter<String>? = null
-        get() {
-            if (field == null) {
-                field = ArrayAdapter(this, R.layout.simple_spinner_item, data)
-                field!!.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                field!!.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
-            }
-
-            return field as ArrayAdapter<String>
+    private val adapter by lazy {
+        ArrayAdapter(this, R.layout.simple_spinner_item, data).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
         }
+    }
 
     private var progressBar: ProgressBar? = null
     private var data = arrayListOf("Tech")
@@ -81,8 +67,6 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
         data = arrayListOf(productListPresenter.selectedCategory)
         swipeRefreshLayout = swiperefresh
         swipeRefreshLayout!!.setOnRefreshListener(this)
-        spinner
-        adapter
         progressBar = topicsProgressBar
         progressBar!!.indeterminateDrawable.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN)
         rvAdapter = ProductRecyclerViewAdapter(productData, myListener)
@@ -101,7 +85,7 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
     }
 
     override fun endRefresh() {
-        swipeRefreshLayout!!.isRefreshing = false
+        swipeRefreshLayout?.isRefreshing = false
     }
 
     override fun onRefresh() {
@@ -139,13 +123,14 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
     // update a categories list
     override fun updateTopicList(data: Set<String>) {
 
-        val selectedItem: String = if (spinner!!.selectedItem != null) {
+        val selectedItem = if (spinner!!.selectedItem != null) {
             spinner!!.selectedItem.toString()
         } else {
             "Tech"
         }
+
         this.data.clear()
-        data.forEach { item -> this.data.add(item) }
+        data.forEach { this.data.add(it) }
         val index = data.indexOf(selectedItem)
 
         adapter!!.notifyDataSetChanged()

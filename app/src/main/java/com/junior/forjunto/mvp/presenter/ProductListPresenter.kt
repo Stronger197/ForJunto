@@ -10,25 +10,11 @@ import com.junior.forjunto.mvp.view.ProductListView
 class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresenter {
 
 
-    var selectedCategory = ""
-        get() {
-            return if (field == "") {
-                "Tech"
-            } else {
-                field
-            }
-        }
-
+    var selectedCategory = PreferencesUsage.getSelectedCategory()
     private var topicListModel = DataUsage(this)
     private var productListModel = ProductDataUsage(this)
-    private var preferencesModel = PreferencesUsage()
     private var categoriesMap = mutableMapOf<String, Topic>()
     private var productMap: MutableMap<String, Post>? = null
-
-    init {
-        // getting selected category from cache if cache empty will selected "Tech"
-        selectedCategory = preferencesModel.getSelectedCategory()
-    }
 
     override fun onFirstViewAttach() {
         super.onFirstViewAttach()
@@ -64,7 +50,7 @@ class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresen
     // invoke this function when the user select a category
     fun newCategorySelected(categoryName: String) {
         selectedCategory = categoryName
-        preferencesModel.setSelectedCategory(selectedCategory)
+        PreferencesUsage.setSelectedCategory(selectedCategory)
         productListModel.getProductListFromCache(categoriesMap[categoryName]!!.slug!!) // getting product list from cache if it possible
         productListModel.updateProducts(categoriesMap[categoryName]!!.slug!!) // getting product list from server
     }

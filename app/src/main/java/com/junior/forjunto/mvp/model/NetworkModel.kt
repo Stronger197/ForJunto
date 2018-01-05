@@ -31,9 +31,9 @@ data class Thumbnail(
 )
 
 data class ScreenshotUrl(
-        @SerializedName("300px") @Expose var _300px: String? = null,
+        @SerializedName("300px") @Expose var image_300px: String? = null,
 
-        @SerializedName("850px") @Expose var _850px: String? = null
+        @SerializedName("850px") @Expose var image_850px: String? = null
 )
 
 data class Topic(

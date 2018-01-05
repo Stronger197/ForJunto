@@ -6,13 +6,15 @@ import android.content.Context
 
 
 class App : Application() {
+
     companion object {
         @SuppressLint("StaticFieldLeak")
         @JvmStatic
-        lateinit private var context : Context
+        lateinit var context: Context
+            private set
 
         @JvmStatic
-        fun getContextApp() : Context {
+        fun getContextApp(): Context {
             return context
         }
     }

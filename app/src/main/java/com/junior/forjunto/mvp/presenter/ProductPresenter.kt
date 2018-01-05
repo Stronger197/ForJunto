@@ -9,7 +9,6 @@ import com.junior.forjunto.mvp.view.ProductView
 
 @InjectViewState
 class ProductPresenter : MvpPresenter<ProductView>() {
-    private var preferencesModel = PreferencesUsage()
 
     var product: Post? = null
 
@@ -25,11 +24,11 @@ class ProductPresenter : MvpPresenter<ProductView>() {
     }
 
     private fun fillscreen() {
-        viewState.setImage(product!!.screenshotUrl!!._300px.toString())
+        viewState.setImage(product!!.screenshotUrl!!.image_300px.toString())
         viewState.setDescription(product!!.tagline.toString())
         viewState.setName(product!!.name.toString())
         viewState.setUpvotes(product!!.votesCount!!)
-        viewState.setAppbarTitle(preferencesModel.getSelectedCategory())
+        viewState.setAppbarTitle(PreferencesUsage.getSelectedCategory())
     }
 
     fun buttonClick() {
