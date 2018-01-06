@@ -29,6 +29,7 @@ import kotlinx.android.synthetic.main.product_list_item.view.*
 class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView.OnItemSelectedListener,
         SwipeRefreshLayout.OnRefreshListener {
 
+
     @InjectPresenter
     lateinit var productListPresenter: ProductListPresenter
 
@@ -73,6 +74,7 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
         mLayoutManager = LinearLayoutManager(this)
         mRecyclerView = product_list_recycler_view
         configureRecyclerView()
+        refreshButton?.setOnClickListener(myListener)
     }
 
     override fun changeActivityToProduct(product: Post) {
@@ -133,13 +135,13 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
         data.forEach { this.data.add(it) }
         val index = data.indexOf(selectedItem)
 
-        adapter!!.notifyDataSetChanged()
+        adapter.notifyDataSetChanged()
         spinner!!.setSelection(index)
     }
 
 
     override fun onNothingSelected(parent: AdapterView<*>?) {
-        // TODO on nothing selected
+        Log.d("NOTHING SELECTED", "INVOKE")
     }
 
     // this method will be called when new category selected
@@ -147,8 +149,30 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
         productListPresenter.newCategorySelected(spinner!!.selectedItem.toString())
     }
 
-    private val myListener = View.OnClickListener { v ->
-        productListPresenter.newTopicSelected(v.product_name_text_view.text.toString())
+    override fun showErrorRefreshMessage() {
+        error_message_layout.visibility = View.VISIBLE
     }
+
+    override fun hideErrorRefreshMessage() {
+        error_message_layout.visibility = View.GONE
+    }
+
+    override fun showSwipeRefresh() {
+        swiperefresh.visibility = View.VISIBLE
+    }
+
+    override fun hideSwipeRefresh() {
+        swiperefresh.visibility = View.GONE
+    }
+
+
+    private val myListener = View.OnClickListener { v ->
+        when (v) {
+            refreshButton -> productListPresenter.refreshButtonClicked()
+            else -> productListPresenter.newTopicSelected(v.product_name_text_view.text.toString())
+        }
+
+    }
+
 
 }

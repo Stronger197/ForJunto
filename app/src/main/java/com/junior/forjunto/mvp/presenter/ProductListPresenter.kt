@@ -1,5 +1,6 @@
 package com.junior.forjunto.mvp.presenter
 
+import android.util.Log
 import com.arellomobile.mvp.InjectViewState
 import com.arellomobile.mvp.MvpPresenter
 import com.junior.forjunto.mvp.model.*
@@ -21,9 +22,12 @@ class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresen
 
         // getting category list from cache and from server
         // on finish will call productListUpdated method
+        initialization()
+    }
+
+    private fun initialization() {
         topicListModel.getCategoriesListFromCache()
         topicListModel.updateCategories()
-
     }
 
     // This method will be called after data in cache successfully updated
@@ -65,11 +69,16 @@ class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresen
     }
 
     override fun categoryListUpdatingError() {
-        // TODO show error message
+        Log.d("CategoryList", "Error")
+        viewState.hideAppbarProgressBar()
+        if (categoriesMap.isEmpty()) {
+            viewState.showErrorRefreshMessage()
+        }
     }
 
     // this function will be called when the category list will updating
     override fun categoryListUpdating() {
+        viewState.hideErrorRefreshMessage()
         viewState.showAppbarProgressBar()
     }
 
@@ -77,9 +86,14 @@ class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresen
     override fun categoryListUpdated(data: List<Topic>) {
         categoriesMap.clear()
         data.forEach { category -> categoriesMap.put(category.name!!, category) }
-
+        viewState.showSwipeRefresh()
         viewState.updateTopicList(categoriesMap.keys)
         viewState.hideAppbarProgressBar()
+    }
+
+    fun refreshButtonClicked() {
+        initialization()
+        Log.d("REFRESH", "BUTTON CLICKED")
     }
 
 }

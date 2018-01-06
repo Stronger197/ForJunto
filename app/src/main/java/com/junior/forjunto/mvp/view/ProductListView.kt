@@ -13,4 +13,8 @@ interface ProductListView : MvpView {
     fun endRefresh()
     fun changeActivityToProduct(product: Post)
     fun showSnackBarMessage(message: String)
+    fun showErrorRefreshMessage()
+    fun hideErrorRefreshMessage()
+    fun showSwipeRefresh()
+    fun hideSwipeRefresh()
 }

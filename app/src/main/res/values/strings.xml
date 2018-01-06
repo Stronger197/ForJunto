@@ -5,4 +5,6 @@
     <string name="productimage">ProductImage</string>
     <string name="get_it">Get it</string>
     <string name="product_thumbnail">Product thumbnail</string>
+    <string name="error_empty_selected">Error while loading categories\nPlease check your internet connection and try again later</string>
+    <string name="try_again">Try again</string>
 </resources>
