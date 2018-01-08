@@ -1,8 +1,6 @@
 package com.junior.forjunto.activity
 
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.PorterDuff
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.widget.SwipeRefreshLayout
@@ -12,7 +10,6 @@ import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.ProgressBar
 import com.arellomobile.mvp.MvpAppCompatActivity
 import com.arellomobile.mvp.presenter.InjectPresenter
 import com.google.gson.Gson
@@ -28,6 +25,7 @@ import kotlinx.android.synthetic.main.product_list_item.view.*
 
 class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView.OnItemSelectedListener,
         SwipeRefreshLayout.OnRefreshListener {
+
 
 
     @InjectPresenter
@@ -49,13 +47,10 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
         }
     }
 
-    private var progressBar: ProgressBar? = null
     private var data = arrayListOf("Tech")
     private var productData = mutableListOf<Post>()
-    private var mRecyclerView: RecyclerView? = null
     private var mLayoutManager: RecyclerView.LayoutManager? = null
     private var rvAdapter: RecyclerView.Adapter<*>? = null
-    private var swipeRefreshLayout: SwipeRefreshLayout? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,13 +61,10 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
 
     private fun init() {
         data = arrayListOf(productListPresenter.selectedCategory)
-        swipeRefreshLayout = swiperefresh
-        swipeRefreshLayout!!.setOnRefreshListener(this)
-        progressBar = topicsProgressBar
-        progressBar!!.indeterminateDrawable.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN)
+        swiperefresh!!.setOnRefreshListener(this)
         rvAdapter = ProductRecyclerViewAdapter(productData, myListener)
         mLayoutManager = LinearLayoutManager(this)
-        mRecyclerView = product_list_recycler_view
+        product_list_recycler_view
         configureRecyclerView()
         refreshButton?.setOnClickListener(myListener)
     }
@@ -87,7 +79,7 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
     }
 
     override fun endRefresh() {
-        swipeRefreshLayout?.isRefreshing = false
+        swiperefresh?.isRefreshing = false
     }
 
     override fun onRefresh() {
@@ -99,8 +91,8 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
         data.forEach { theme -> Log.d("Products", theme.name) }
         productData.clear()
         productData = data.toMutableList()
-        mRecyclerView!!.adapter = ProductRecyclerViewAdapter(productData, myListener)
-        mRecyclerView!!.adapter.notifyDataSetChanged()
+        product_list_recycler_view!!.adapter = ProductRecyclerViewAdapter(productData, myListener)
+        product_list_recycler_view!!.adapter.notifyDataSetChanged()
     }
 
     // show an snackbar with message
@@ -110,16 +102,8 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
 
 
     private fun configureRecyclerView() {
-        mRecyclerView!!.layoutManager = mLayoutManager
-        mRecyclerView!!.adapter = rvAdapter
-    }
-
-    override fun showAppbarProgressBar() {
-        progressBar!!.visibility = View.VISIBLE
-    }
-
-    override fun hideAppbarProgressBar() {
-        progressBar!!.visibility = View.GONE
+        product_list_recycler_view!!.layoutManager = mLayoutManager
+        product_list_recycler_view!!.adapter = rvAdapter
     }
 
     // update a categories list
@@ -147,29 +131,29 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
     // this method will be called when new category selected
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         productListPresenter.newCategorySelected(spinner!!.selectedItem.toString())
+        Log.d("CATEGORY SELECTED", "INVOKE")
     }
 
-    override fun showErrorRefreshMessage() {
-        error_message_layout.visibility = View.VISIBLE
+    override fun showErrorRefreshMessage(boolean: Boolean) {
+        if (boolean) {
+            error_message_layout.visibility = View.VISIBLE
+        } else {
+            error_message_layout.visibility = View.GONE
+        }
     }
 
-    override fun hideErrorRefreshMessage() {
-        error_message_layout.visibility = View.GONE
+    override fun showSwipeRefresh(boolean: Boolean) {
+        if (boolean) {
+            swiperefresh.visibility = View.VISIBLE
+        } else {
+            swiperefresh.visibility = View.GONE
+        }
     }
-
-    override fun showSwipeRefresh() {
-        swiperefresh.visibility = View.VISIBLE
-    }
-
-    override fun hideSwipeRefresh() {
-        swiperefresh.visibility = View.GONE
-    }
-
 
     private val myListener = View.OnClickListener { v ->
         when (v) {
             refreshButton -> productListPresenter.refreshButtonClicked()
-            else -> productListPresenter.newTopicSelected(v.product_name_text_view.text.toString())
+            else -> productListPresenter.newProductSelected(v.product_name_text_view.text.toString())
         }
 
     }

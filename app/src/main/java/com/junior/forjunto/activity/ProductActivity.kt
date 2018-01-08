@@ -5,9 +5,6 @@ import android.os.Bundle
 import android.support.customtabs.CustomTabsIntent
 import android.support.v4.content.res.ResourcesCompat
 import android.view.View
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
 import com.arellomobile.mvp.MvpAppCompatActivity
 import com.arellomobile.mvp.presenter.InjectPresenter
 import com.google.gson.Gson
@@ -25,21 +22,11 @@ class ProductActivity : MvpAppCompatActivity(), ProductView {
     @InjectPresenter
     lateinit var productPresenter: ProductPresenter
 
-    private var imageView: ImageView? = null
-    private var descriptionTV: TextView? = null
-    private var nameTV: TextView? = null
-    private var upvoteTV: TextView? = null
-    private var getItButton: Button? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product)
-        imageView = product_image_view
-        descriptionTV = product_description
-        nameTV = product_name
-        upvoteTV = upvotes
-        getItButton = get_button
-        getItButton!!.setOnClickListener(onClickListener)
+        get_button!!.setOnClickListener(onClickListener)
     }
 
     override fun setAppbarTitle(title: String) {
@@ -47,19 +34,19 @@ class ProductActivity : MvpAppCompatActivity(), ProductView {
     }
 
     override fun setDescription(description: String) {
-        descriptionTV!!.text = description
+        product_description!!.text = description
     }
 
     override fun setName(name: String) {
-        nameTV!!.text = name
+        product_name!!.text = name
     }
 
     override fun setUpvotes(num: Int) {
-        upvoteTV!!.text = getString(R.string.upvote, num)
+        upvotes!!.text = getString(R.string.upvote, num)
     }
 
     override fun setImage(url: String) {
-        Picasso.with(this).load(url).fit().into(imageView)
+        Picasso.with(this).load(url).fit().into(product_image_view)
     }
 
     override fun getDataFromIntent() {
@@ -69,7 +56,7 @@ class ProductActivity : MvpAppCompatActivity(), ProductView {
         productPresenter.saveProduct(gson.fromJson(intent.getStringExtra("product"), Post::class.java))
     }
 
-    private val onClickListener = View.OnClickListener { v ->
+    private val onClickListener = View.OnClickListener {
         productPresenter.buttonClick()
     }
 

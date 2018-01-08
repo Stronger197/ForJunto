@@ -7,13 +7,10 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import com.google.gson.Gson
 import com.junior.forjunto.App
-import com.junior.forjunto.network.ProductHuntApi
-import com.junior.forjunto.productHuntToken
+import com.junior.forjunto.network.RetrofitModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 class ProductDataUsage(val productListPresenter: IProductListPresenter) {
     private val TAG: String = "Producthunt Products"
@@ -29,7 +26,7 @@ class ProductDataUsage(val productListPresenter: IProductListPresenter) {
     // this function getting products from producthunt api, cache it in memory
     // When is done function invoke callback from presenter class
     private fun getProducts(category: String) {
-        getApi().getProducts("Bearer " + productHuntToken, category).enqueue(object : Callback<ProductHuntProductsApiResponse> {
+        RetrofitModel.getApi().getProducts(category).enqueue(object : Callback<ProductHuntProductsApiResponse> {
             override fun onResponse(call: Call<ProductHuntProductsApiResponse>, response: Response<ProductHuntProductsApiResponse>) {
                 val body = response.body()
                 Log.d(TAG, "Response CODE: " + response.code())
@@ -43,7 +40,7 @@ class ProductDataUsage(val productListPresenter: IProductListPresenter) {
 
             override fun onFailure(call: Call<ProductHuntProductsApiResponse>, t: Throwable) {
                 Log.d(TAG, "error: " + t.message)
-                Log.d("TEST", "ERROR");
+                Log.d("TEST", "ERROR FROM PRODUCT DATA USAGE")
                 productListPresenter.productListUpdateError()
             }
         })
@@ -87,19 +84,6 @@ class ProductDataUsage(val productListPresenter: IProductListPresenter) {
 
         c.close()
         db.close()
-    }
-
-    // returns interface to work with producthunt API
-    private fun getApi(): ProductHuntApi {
-
-           val retrofit = Retrofit.Builder()
-                    .baseUrl("https://api.producthunt.com")
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build()
-
-
-
-        return retrofit!!.create(ProductHuntApi::class.java)
     }
 
     internal inner class DBHelper(context: Context) : SQLiteOpenHelper(context, "ProducthuntDB", null, 1) {

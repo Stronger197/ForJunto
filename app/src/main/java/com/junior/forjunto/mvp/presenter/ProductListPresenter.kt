@@ -10,7 +10,6 @@ import com.junior.forjunto.mvp.view.ProductListView
 @InjectViewState
 class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresenter {
 
-
     var selectedCategory = PreferencesUsage.getSelectedCategory()
     private var topicListModel = DataUsage(this)
     private var productListModel = ProductDataUsage(this)
@@ -41,14 +40,13 @@ class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresen
     }
 
     // invoke this function when user select a product
-    fun newTopicSelected(topicName: String) {
+    fun newProductSelected(topicName: String) {
         viewState.changeActivityToProduct(productMap!![topicName]!!)
     }
 
     // This method will be called if the product list has not been updated
     override fun productListUpdateError() {
         viewState.endRefresh()
-        viewState.showSnackBarMessage("Error while updating list, please check your internet connection")
     }
 
     // invoke this function when the user select a category
@@ -70,25 +68,21 @@ class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresen
 
     override fun categoryListUpdatingError() {
         Log.d("CategoryList", "Error")
-        viewState.hideAppbarProgressBar()
         if (categoriesMap.isEmpty()) {
-            viewState.showErrorRefreshMessage()
+            viewState.showErrorRefreshMessage(true)
         }
     }
 
     // this function will be called when the category list will updating
     override fun categoryListUpdating() {
-        viewState.hideErrorRefreshMessage()
-        viewState.showAppbarProgressBar()
+        viewState.showErrorRefreshMessage(false)
     }
 
     // this function will be called when the category list will updated
     override fun categoryListUpdated(data: List<Topic>) {
         categoriesMap.clear()
         data.forEach { category -> categoriesMap.put(category.name!!, category) }
-        viewState.showSwipeRefresh()
         viewState.updateTopicList(categoriesMap.keys)
-        viewState.hideAppbarProgressBar()
     }
 
     fun refreshButtonClicked() {
