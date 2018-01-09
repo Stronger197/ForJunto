@@ -12,6 +12,7 @@ class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresen
     val TAG = "ProductListPresenter"
 
     var selectedCategory = PreferencesUsage.getSelectedCategory()
+    var usedCategory = ""
     private var topicListModel = DataUsage(this)
     private var productListModel = ProductDataUsage(this)
     private var categoriesMap = mutableMapOf<String, Topic>()
@@ -26,6 +27,7 @@ class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresen
     }
 
     private fun initialization() {
+        Log.d("Initialization", "INVOKE")
         topicListModel.updateCategories()
         viewState.setProgressVisibility(true)
     }
@@ -37,12 +39,17 @@ class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresen
 
     // invoke this function when the user select a category
     fun newCategorySelected(categoryName: String) {
-        selectedCategory = categoryName
-        PreferencesUsage.setSelectedCategory(selectedCategory)
-        viewState.setRecyclerViewVisibility(false)
-        viewState.setProgressVisibility(true)
+        Log.d("Selected Category", "category name is: $categoryName")
+        Log.d("Selected Category", "usedCategory is: $usedCategory")
+        if (categoryName != usedCategory) {
+            selectedCategory = categoryName
+            usedCategory = categoryName
+            PreferencesUsage.setSelectedCategory(selectedCategory)
+            viewState.setRecyclerViewVisibility(false)
+            viewState.setProgressVisibility(true)
 
-        productListModel.updateProducts(categoriesMap[categoryName]!!.slug!!) // getting product list from server
+            productListModel.updateProducts(categoriesMap[categoryName]!!.slug!!) // getting product list from server
+        }
     }
 
     // This method will be called if the product list has not been updated

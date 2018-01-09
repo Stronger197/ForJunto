@@ -80,6 +80,5 @@
         android:gravity="center"
         android:src="@drawable/nothing_image"
         android:visibility="gone">
-
     </ImageView>
 </android.support.design.widget.CoordinatorLayout>

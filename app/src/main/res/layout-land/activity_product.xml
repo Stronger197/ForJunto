@@ -2,34 +2,21 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingBottom="16dp">
+    android:orientation="horizontal">
 
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="310dp">
+        android:layout_height="match_parent">
 
         <ImageView
             android:id="@+id/product_image_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="21dp"
+            android:layout_centerVertical="true"
             android:contentDescription="@string/productimage"
             android:src="@drawable/ic_image"
             android:tint="#80000000" />
-
-        <Button
-            android:id="@+id/get_button"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:backgroundTint="@color/colorPrimary"
-            android:text="@string/get_it"
-            android:textAllCaps="false"
-            android:textColor="@color/text_light"
-            android:textSize="20sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -41,6 +28,7 @@
                 style="@style/TextAppearance.AppCompat.Large"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="end"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
                 android:layout_marginTop="24dp"
@@ -54,30 +42,39 @@
                 style="@style/TextAppearance.AppCompat.Medium"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="end"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
                 android:drawableEnd="@drawable/ic_arrow_drop_up_white_24dp"
                 android:lines="1"
                 android:textColor="@color/text_light"
                 android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/product_description"
+                style="@style/TextAppearance.AppCompat.Large"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="16dp"
+                android:textColor="@color/text_light"
+                android:textStyle="bold" />
         </LinearLayout>
 
-
-    </RelativeLayout>
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <TextView
-            android:id="@+id/product_description"
-            style="@style/TextAppearance.AppCompat.Large"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/get_button"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="16dp"
             android:layout_marginTop="16dp"
-            android:textColor="@color/text_dark"
-            android:textStyle="bold" />
-    </ScrollView>
+            android:backgroundTint="@color/colorPrimary"
+            android:text="@string/get_it"
+            android:textAllCaps="false"
+            android:textColor="@color/text_light"
+            android:textSize="20sp" />
+    </RelativeLayout>
 </LinearLayout>

@@ -23,6 +23,7 @@ import kotlinx.android.synthetic.main.content_product_list.*
 import kotlinx.android.synthetic.main.product_list_item.view.*
 
 
+
 class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView.OnItemSelectedListener,
         SwipeRefreshLayout.OnRefreshListener {
 
@@ -33,7 +34,7 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
         categorySpinner.apply {
             adapter = this@ProductListActivity.adapter
             prompt = "Tech"
-            setSelection(0)
+            //  setSelection(0)
             onItemSelectedListener = this@ProductListActivity
         }
     }
@@ -58,6 +59,7 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
     }
 
     private fun init() {
+        Log.d("Inasd", "asdasd")
         data = arrayListOf(productListPresenter.selectedCategory)
         swiperefresh!!.setOnRefreshListener(this)
         rvAdapter = ProductRecyclerViewAdapter(productData, myListener)
@@ -180,7 +182,5 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
             nothing_image_view.visibility = View.GONE
         }
     }
-
-
 
 }

@@ -19,7 +19,7 @@ object RetrofitModel {
         val client = OkHttpClient.Builder()
                 .writeTimeout(1, TimeUnit.SECONDS)
                 .connectTimeout(1, TimeUnit.SECONDS)
-                .readTimeout(1, TimeUnit.SECONDS)
+                .readTimeout(2, TimeUnit.SECONDS)
                 .addInterceptor(TokenInterceptor())
                 .build()
 
