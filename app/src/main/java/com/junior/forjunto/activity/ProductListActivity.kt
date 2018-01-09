@@ -26,8 +26,6 @@ import kotlinx.android.synthetic.main.product_list_item.view.*
 class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView.OnItemSelectedListener,
         SwipeRefreshLayout.OnRefreshListener {
 
-
-
     @InjectPresenter
     lateinit var productListPresenter: ProductListPresenter
 
@@ -84,6 +82,7 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
 
     override fun onRefresh() {
         productListPresenter.productListRefresh()
+        Log.d("Refresh", "Invoke")
     }
 
     // update a list of products
@@ -134,19 +133,27 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
         Log.d("CATEGORY SELECTED", "INVOKE")
     }
 
-    override fun showErrorRefreshMessage(boolean: Boolean) {
-        if (boolean) {
+    override fun setErrorRefreshMessageVisibility(isVisible: Boolean) {
+        if (isVisible) {
             error_message_layout.visibility = View.VISIBLE
         } else {
             error_message_layout.visibility = View.GONE
         }
     }
 
-    override fun showSwipeRefresh(boolean: Boolean) {
-        if (boolean) {
+    override fun setSwipeRefreshVisibility(isVisible: Boolean) {
+        if (isVisible) {
             swiperefresh.visibility = View.VISIBLE
         } else {
             swiperefresh.visibility = View.GONE
+        }
+    }
+
+    override fun setRecyclerViewVisibility(isVisible: Boolean) {
+        if (isVisible) {
+            product_list_recycler_view.visibility = View.VISIBLE
+        } else {
+            product_list_recycler_view.visibility = View.GONE
         }
     }
 
@@ -157,6 +164,23 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
         }
 
     }
+
+    override fun setProgressVisibility(isVisible: Boolean) {
+        if (isVisible) {
+            loading_progress_bar.visibility = View.VISIBLE
+        } else {
+            loading_progress_bar.visibility = View.GONE
+        }
+    }
+
+    override fun setNothingImageVisibility(isVisible: Boolean) {
+        if (isVisible) {
+            nothing_image_view.visibility = View.VISIBLE
+        } else {
+            nothing_image_view.visibility = View.GONE
+        }
+    }
+
 
 
 }

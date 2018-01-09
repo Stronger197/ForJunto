@@ -13,7 +13,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class ProductDataUsage(val productListPresenter: IProductListPresenter) {
-    private val TAG: String = "Producthunt Products"
+    private val TAG: String = "Products model"
     private var dbHelper = DBHelper(App.getContextApp())
 
 
@@ -26,6 +26,7 @@ class ProductDataUsage(val productListPresenter: IProductListPresenter) {
     // this function getting products from producthunt api, cache it in memory
     // When is done function invoke callback from presenter class
     private fun getProducts(category: String) {
+        productListPresenter.productListUpdating()
         RetrofitModel.getApi().getProducts(category).enqueue(object : Callback<ProductHuntProductsApiResponse> {
             override fun onResponse(call: Call<ProductHuntProductsApiResponse>, response: Response<ProductHuntProductsApiResponse>) {
                 val body = response.body()
@@ -33,15 +34,14 @@ class ProductDataUsage(val productListPresenter: IProductListPresenter) {
                 Log.d(TAG, "Response Body: " + response.body().toString())
                 if (body != null) {
                     cacheProductsList(body.posts, category)
-                } else {
-                    productListPresenter.productListUpdateError()
                 }
             }
 
             override fun onFailure(call: Call<ProductHuntProductsApiResponse>, t: Throwable) {
                 Log.d(TAG, "error: " + t.message)
-                Log.d("TEST", "ERROR FROM PRODUCT DATA USAGE")
-                productListPresenter.productListUpdateError()
+                Log.d(TAG, "Connection error ${t.message}\n\t[Loading data from cache...]")
+                getProductListFromCache(category)
+                productListPresenter.productListUpdatingError()
             }
         })
     }
@@ -60,7 +60,7 @@ class ProductDataUsage(val productListPresenter: IProductListPresenter) {
             val sqlEscapeObj = DatabaseUtils.sqlEscapeString(gson.toJson(posts))
             db.execSQL("replace into Products (id, obj) values ($sqlEscapeId ,$sqlEscapeObj);")
         } else {
-            productListPresenter.productListUpdateError()
+            productListPresenter.productListUpdatingError()
         }
 
         db.close()
@@ -70,7 +70,7 @@ class ProductDataUsage(val productListPresenter: IProductListPresenter) {
 
     // function to get list of Products by category from cache
     // invoke this function if you want update product list from cache
-    fun getProductListFromCache(category: String) {
+    private fun getProductListFromCache(category: String) {
         val gson = Gson()
         val db = dbHelper.writableDatabase
         val c = db.query("Products", arrayOf("obj"), "id == \"" + category + "\"", null, null, null, null)
@@ -78,9 +78,10 @@ class ProductDataUsage(val productListPresenter: IProductListPresenter) {
         if (c.moveToFirst()) {
             val data = gson.fromJson("{posts=${c.getString(0)}}", ProductHuntProductsApiResponse::class.java)
             productListPresenter.productListUpdated(data, category)
-        } else
+        } else {
             Log.d(TAG, "0 rows")
-
+            productListPresenter.productListUpdated(ProductHuntProductsApiResponse(listOf()), category)
+        }
 
         c.close()
         db.close()
@@ -97,6 +98,5 @@ class ProductDataUsage(val productListPresenter: IProductListPresenter) {
 
         }
     }
-
 
 }

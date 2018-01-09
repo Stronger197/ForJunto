@@ -9,6 +9,7 @@ import com.junior.forjunto.mvp.view.ProductListView
 
 @InjectViewState
 class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresenter {
+    val TAG = "ProductListPresenter"
 
     var selectedCategory = PreferencesUsage.getSelectedCategory()
     private var topicListModel = DataUsage(this)
@@ -25,18 +26,8 @@ class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresen
     }
 
     private fun initialization() {
-        topicListModel.getCategoriesListFromCache()
         topicListModel.updateCategories()
-    }
-
-    // This method will be called after data in cache successfully updated
-    override fun productListUpdated(data: ProductHuntProductsApiResponse, name: String) {
-        if (productMap == null) productMap = mutableMapOf()
-        data.posts?.forEach { product ->
-            productMap!!.put(product.name!!, product)
-        }
-        viewState.updateProductList(data.posts!!)   // update category spinner in toolbar
-        viewState.endRefresh()   // hide progress bar
+        viewState.setProgressVisibility(true)
     }
 
     // invoke this function when user select a product
@@ -44,17 +35,71 @@ class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresen
         viewState.changeActivityToProduct(productMap!![topicName]!!)
     }
 
-    // This method will be called if the product list has not been updated
-    override fun productListUpdateError() {
-        viewState.endRefresh()
-    }
-
     // invoke this function when the user select a category
     fun newCategorySelected(categoryName: String) {
         selectedCategory = categoryName
         PreferencesUsage.setSelectedCategory(selectedCategory)
-        productListModel.getProductListFromCache(categoriesMap[categoryName]!!.slug!!) // getting product list from cache if it possible
+        viewState.setRecyclerViewVisibility(false)
+        viewState.setProgressVisibility(true)
+
         productListModel.updateProducts(categoriesMap[categoryName]!!.slug!!) // getting product list from server
+    }
+
+    // This method will be called if the product list has not been updated
+    override fun productListUpdatingError() {
+        viewState.endRefresh()
+        viewState.showSnackBarMessage("Connection error. Getting data from cache")
+    }
+
+    // This method will be called if the product list successfully updated
+    override fun productListUpdating() {
+        viewState.setNothingImageVisibility(false)
+    }
+
+    // This method will be called if the product list successfully updated
+    override fun productListUpdated(data: ProductHuntProductsApiResponse, name: String) {
+        if (productMap == null) productMap = mutableMapOf()
+        data.posts?.forEach { product ->
+            productMap!!.put(product.name!!, product)
+        }
+
+        if (data.posts!!.isEmpty()) {
+            Log.d(TAG, "Product Map is empty")
+            viewState.setNothingImageVisibility(true)
+        }
+
+        viewState.setRecyclerViewVisibility(true)
+        viewState.setProgressVisibility(false)
+        viewState.updateProductList(data.posts!!)
+        viewState.endRefresh()   // hide progress bar
+    }
+
+
+    // ___________________CATEGORIES _________________________
+    override fun categoryListUpdatingError() {
+        if (categoriesMap.isEmpty()) {
+            viewState.setProgressVisibility(false)
+            viewState.setErrorRefreshMessageVisibility(true)
+        }
+    }
+
+    // this function will be called when the category list will updating
+    override fun categoryListUpdating() {
+        viewState.setErrorRefreshMessageVisibility(false)
+    }
+
+    // this function will be called when the category list will updated
+    override fun categoryListUpdated(data: List<Topic>) {
+        categoriesMap.clear()
+        data.forEach { category -> categoriesMap.put(category.name!!, category) }
+        viewState.updateTopicList(categoriesMap.keys)
+    }
+    // _________________________________________________________
+
+
+    fun refreshButtonClicked() {
+        Log.d(TAG, "Refresh button clicked")
+        initialization()
     }
 
     // invoke this function when you need to update the list of products
@@ -64,30 +109,6 @@ class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresen
         } else {
             topicListModel.updateCategories()
         }
-    }
-
-    override fun categoryListUpdatingError() {
-        Log.d("CategoryList", "Error")
-        if (categoriesMap.isEmpty()) {
-            viewState.showErrorRefreshMessage(true)
-        }
-    }
-
-    // this function will be called when the category list will updating
-    override fun categoryListUpdating() {
-        viewState.showErrorRefreshMessage(false)
-    }
-
-    // this function will be called when the category list will updated
-    override fun categoryListUpdated(data: List<Topic>) {
-        categoriesMap.clear()
-        data.forEach { category -> categoriesMap.put(category.name!!, category) }
-        viewState.updateTopicList(categoriesMap.keys)
-    }
-
-    fun refreshButtonClicked() {
-        initialization()
-        Log.d("REFRESH", "BUTTON CLICKED")
     }
 
 }

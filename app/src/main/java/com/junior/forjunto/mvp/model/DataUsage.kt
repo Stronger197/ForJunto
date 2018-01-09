@@ -7,21 +7,15 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import com.google.gson.Gson
 import com.junior.forjunto.App
-import com.junior.forjunto.mvp.presenter.ProductListPresenter
 import com.junior.forjunto.network.RetrofitModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 
-class DataUsage(productListPresenter: ProductListPresenter) {
-    private val TAG: String = "Producthunt API"
-    private var productListPresenterInterface: IProductListPresenter? = null
+class DataUsage(val productListPresenter: IProductListPresenter) {
+    private val TAG: String = "Categories model"
     private var dbHelper: DBHelper? = null
-
-    init {
-        productListPresenterInterface = productListPresenter
-    }
 
     // invoke this function if you want update category list from server
     fun updateCategories() {
@@ -32,7 +26,7 @@ class DataUsage(productListPresenter: ProductListPresenter) {
     // When is done function invoke callback from presenter class
     private fun getCategories() {
         Log.d(TAG, "getCategories Invoke")
-        productListPresenterInterface!!.categoryListUpdating()
+        productListPresenter.categoryListUpdating()
         RetrofitModel.getApi().getTopics().enqueue(object : Callback<ProductHuntTopicsApiResponse> {
             override fun onResponse(call: Call<ProductHuntTopicsApiResponse>, response: Response<ProductHuntTopicsApiResponse>) {
                 val body = response.body()
@@ -40,15 +34,14 @@ class DataUsage(productListPresenter: ProductListPresenter) {
                 Log.d(TAG, "Response Body: " + response.body().toString())
                 if (body != null) {
                     cacheCategoriesList(body.topics!!)
-                } else {
-                    productListPresenterInterface!!.categoryListUpdatingError()
                 }
             }
 
             override fun onFailure(call: Call<ProductHuntTopicsApiResponse>, t: Throwable) {
                 Log.d(TAG, "error: " + t.message)
-                Log.d("TEST", "ERROR FROM DATAUSAGE")
-                productListPresenterInterface!!.categoryListUpdatingError()
+                Log.d(TAG, "Connection error ${t.message}\n\t[Loading data from cache...]")
+                getCategoriesListFromCache()
+                productListPresenter.categoryListUpdatingError()
             }
         })
     }
@@ -89,7 +82,7 @@ class DataUsage(productListPresenter: ProductListPresenter) {
         c.close()
         db.close()
 
-        productListPresenterInterface!!.categoryListUpdated(data)
+        productListPresenter.categoryListUpdated(data)
     }
 
 
@@ -112,6 +105,5 @@ class DataUsage(productListPresenter: ProductListPresenter) {
 
         }
     }
-
 
 }

@@ -17,9 +17,9 @@ object RetrofitModel {
 
     private fun configureRetrofit(): Retrofit {
         val client = OkHttpClient.Builder()
-                .writeTimeout(5, TimeUnit.SECONDS)
-                .connectTimeout(5, TimeUnit.SECONDS)
-                .readTimeout(5, TimeUnit.SECONDS)
+                .writeTimeout(1, TimeUnit.SECONDS)
+                .connectTimeout(1, TimeUnit.SECONDS)
+                .readTimeout(1, TimeUnit.SECONDS)
                 .addInterceptor(TokenInterceptor())
                 .build()
 
@@ -36,12 +36,11 @@ object RetrofitModel {
 
         @Throws(IOException::class)
         override fun intercept(chain: Interceptor.Chain): Response {
-            val initialRequest = chain.request()
-            val modifiedRequest = initialRequest.newBuilder()
+            val initialRequest = chain.request().newBuilder()
                     .addHeader("Authorization", "Bearer $token")
                     .build()
 
-            return chain.proceed(modifiedRequest)
+            return chain.proceed(initialRequest)
         }
     }
 

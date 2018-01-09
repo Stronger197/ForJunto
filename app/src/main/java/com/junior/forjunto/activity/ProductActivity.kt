@@ -18,10 +18,8 @@ import kotlinx.android.synthetic.main.activity_product.*
 
 class ProductActivity : MvpAppCompatActivity(), ProductView {
 
-
     @InjectPresenter
     lateinit var productPresenter: ProductPresenter
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

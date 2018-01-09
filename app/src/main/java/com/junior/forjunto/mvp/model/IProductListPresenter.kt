@@ -5,5 +5,6 @@ interface IProductListPresenter {
     fun categoryListUpdating()
     fun categoryListUpdatingError()
     fun productListUpdated(data: ProductHuntProductsApiResponse, name: String)
-    fun productListUpdateError()
+    fun productListUpdating()
+    fun productListUpdatingError()
 }
