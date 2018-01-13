@@ -5,12 +5,11 @@ import android.os.Bundle
 import android.support.customtabs.CustomTabsIntent
 import android.support.v4.content.res.ResourcesCompat
 import android.view.MenuItem
-import android.view.View
 import com.arellomobile.mvp.MvpAppCompatActivity
 import com.arellomobile.mvp.presenter.InjectPresenter
 import com.google.gson.Gson
 import com.junior.forjunto.R
-import com.junior.forjunto.mvp.model.Post
+import com.junior.forjunto.mvp.model.Product
 import com.junior.forjunto.mvp.presenter.ProductPresenter
 import com.junior.forjunto.mvp.view.ProductView
 import com.squareup.picasso.Picasso
@@ -25,7 +24,7 @@ class ProductActivity : MvpAppCompatActivity(), ProductView {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product)
-        get_button!!.setOnClickListener(onClickListener)
+        get_button!!.setOnClickListener({ productPresenter.buttonClick() })
     }
 
     override fun setAppbarTitle(title: String) {
@@ -33,15 +32,15 @@ class ProductActivity : MvpAppCompatActivity(), ProductView {
     }
 
     override fun setDescription(description: String) {
-        product_description!!.text = description
+        product_description.text = description
     }
 
     override fun setName(name: String) {
-        product_name!!.text = name
+        product_name.text = name
     }
 
     override fun setUpvotes(num: Int) {
-        upvotes!!.text = getString(R.string.upvote, num)
+        upvotes.text = getString(R.string.upvote, num)
     }
 
     override fun setImage(url: String) {
@@ -50,15 +49,11 @@ class ProductActivity : MvpAppCompatActivity(), ProductView {
 
     override fun getDataFromIntent() {
         val intent = intent
-        val gson = Gson()
 
-        productPresenter.saveProduct(gson.fromJson(intent.getStringExtra("product"), Post::class.java))
+        productPresenter.saveProduct(Gson().fromJson(intent.getStringExtra("product"), Product::class.java))
     }
 
-    private val onClickListener = View.OnClickListener {
-        productPresenter.buttonClick()
-    }
-
+    // open web page using chrome custom tabs
     override fun openWebPage(url: String) {
         val builder = CustomTabsIntent.Builder()
         builder.setToolbarColor(ResourcesCompat.getColor(resources, R.color.colorPrimary, null))

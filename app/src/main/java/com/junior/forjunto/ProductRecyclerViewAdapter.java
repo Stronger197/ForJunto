@@ -7,17 +7,17 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.junior.forjunto.mvp.model.Post;
+import com.junior.forjunto.mvp.model.Product;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
 public class ProductRecyclerViewAdapter extends RecyclerView.Adapter<ProductRecyclerViewAdapter.ViewHolder> {
-    private List<Post> mDataset;
+    private List<Product> mDataset;
     private View.OnClickListener clickListener;
 
 
-    public ProductRecyclerViewAdapter(List<Post> myDataset, View.OnClickListener listener) {
+    public ProductRecyclerViewAdapter(List<Product> myDataset, View.OnClickListener listener) {
         clickListener = listener;
         mDataset = myDataset;
     }

@@ -2,22 +2,22 @@ package com.junior.forjunto.mvp.presenter
 
 import com.arellomobile.mvp.InjectViewState
 import com.arellomobile.mvp.MvpPresenter
-import com.junior.forjunto.mvp.model.Post
 import com.junior.forjunto.mvp.model.PreferencesUsage
+import com.junior.forjunto.mvp.model.Product
 import com.junior.forjunto.mvp.view.ProductView
 
 
 @InjectViewState
 class ProductPresenter : MvpPresenter<ProductView>() {
 
-    var product: Post? = null
+    var product: Product? = null
 
     override fun onFirstViewAttach() {
         super.onFirstViewAttach()
         viewState.getDataFromIntent() // getting data from intent, on finish will call saveProduct function
     }
 
-    fun saveProduct(product: Post) {
+    fun saveProduct(product: Product) {
         this.product = product
 
         fillscreen()

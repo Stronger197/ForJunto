@@ -9,107 +9,127 @@ import com.junior.forjunto.mvp.view.ProductListView
 
 @InjectViewState
 class ProductListPresenter : MvpPresenter<ProductListView>(), IProductListPresenter {
-    val TAG = "ProductListPresenter"
+    private val TAG = "ProductListPresenter"
 
-    var selectedCategory = PreferencesUsage.getSelectedCategory()
-    var usedCategory = ""
-    private var topicListModel = DataUsage(this)
+    private var topicListModel = CategoriesDataUsage(this)
     private var productListModel = ProductDataUsage(this)
-    private var categoriesMap = mutableMapOf<String, Topic>()
-    private var productMap: MutableMap<String, Post>? = null
+
+    private var usedCategory = ""
+    private var selectedCategory = PreferencesUsage.getSelectedCategory()
+    private var categoriesMap = mutableMapOf<String, Category>()
+    private var productMap = mutableMapOf<String, Product>()
 
     override fun onFirstViewAttach() {
         super.onFirstViewAttach()
 
-        // getting category list from cache and from server
-        // on finish will call productListUpdated method
-        initialization()
+        updateCategories()
     }
 
-    private fun initialization() {
-        Log.d("Initialization", "INVOKE")
+    /**
+     * getting a list of categories from server or if server is unreachable from the cache
+     * on finish will call productListUpdated method
+     */
+    private fun updateCategories() {
         topicListModel.updateCategories()
         viewState.setProgressVisibility(true)
     }
 
-    // invoke this function when user select a product
+    /** invoke this function when user select a product */
     fun newProductSelected(topicName: String) {
-        viewState.changeActivityToProduct(productMap!![topicName]!!)
+        viewState.changeActivityToProduct(productMap[topicName]!!)
     }
 
-    // invoke this function when the user select a category
+    /**
+     * on new category selected
+     * if selected category not equal used category (lifecycle fighter)
+     * set selected category into cache and set new used category,
+     * after it update product list dataset
+     */
     fun newCategorySelected(categoryName: String) {
-        Log.d("Selected Category", "category name is: $categoryName")
+        Log.d("Selected Category", "selectedCategory is: $categoryName")
         Log.d("Selected Category", "usedCategory is: $usedCategory")
-        if (categoryName != usedCategory) {
-            selectedCategory = categoryName
-            usedCategory = categoryName
-            PreferencesUsage.setSelectedCategory(selectedCategory)
-            viewState.setRecyclerViewVisibility(false)
-            viewState.setProgressVisibility(true)
 
-            productListModel.updateProducts(categoriesMap[categoryName]!!.slug!!) // getting product list from server
+        /**
+         * this is orientation changes handler
+         * because when orientation changing, the method newCategorySelected is called again
+         */
+        if (categoryName != usedCategory) {
+            selectedCategory = categoryName // set new selected category
+            PreferencesUsage.setSelectedCategory(selectedCategory) // save it into cache
+            usedCategory = categoryName // set new used category
+
+            viewState.setRecyclerViewVisibility(false) // hide product list
+            viewState.setProgressVisibility(true) // show progress bar
+
+            productListModel.updateProducts(categoriesMap[categoryName]?.slug!!) // get product list from server
         }
     }
 
-    // This method will be called if the product list has not been updated
+    // ___________________PRODUCTS _________________________
+    /** This method will be called if the product list has not been updated and data will be retrieved from cache */
     override fun productListUpdatingError() {
         viewState.endRefresh()
-        viewState.showSnackBarMessage("Connection error. Getting data from cache")
+        viewState.showSnackBarMessage("Connection error. Getting data from cache...")
     }
 
-    // This method will be called if the product list successfully updated
+    /** When product list is updating */
     override fun productListUpdating() {
         viewState.setNothingImageVisibility(false)
     }
 
-    // This method will be called if the product list successfully updated
+    /** This method will be called if the product list successfully updated */
     override fun productListUpdated(data: ProductHuntProductsApiResponse, name: String) {
-        if (productMap == null) productMap = mutableMapOf()
+
+        /** save product list into array */
+        productMap.clear()
         data.posts?.forEach { product ->
-            productMap!!.put(product.name!!, product)
+            productMap.put(product.name!!, product)
         }
 
-        if (data.posts!!.isEmpty()) {
+        /** if product list is empty show empty image */
+        if (productMap.isEmpty()) {
             Log.d(TAG, "Product Map is empty")
             viewState.setNothingImageVisibility(true)
         }
 
-        viewState.setRecyclerViewVisibility(true)
-        viewState.setProgressVisibility(false)
-        viewState.updateProductList(data.posts!!)
+        viewState.setRecyclerViewVisibility(true) // show product list
+        viewState.setProgressVisibility(false) // hide progress bar
+        viewState.updateProductList(data.posts!!) // update product list dataset
         viewState.endRefresh()   // hide progress bar
     }
-
+    // _________________________________________________________
 
     // ___________________CATEGORIES _________________________
+    /** This method will be called if the categories list has not been updated and data will be retrieved from cache */
     override fun categoryListUpdatingError() {
+        // if cache is empty show error message
         if (categoriesMap.isEmpty()) {
             viewState.setProgressVisibility(false)
             viewState.setErrorRefreshMessageVisibility(true)
         }
     }
 
-    // this function will be called when the category list will updating
+    /** this function will be called when the category list will updating */
     override fun categoryListUpdating() {
         viewState.setErrorRefreshMessageVisibility(false)
     }
 
-    // this function will be called when the category list will updated
-    override fun categoryListUpdated(data: List<Topic>) {
+    /** this function will be called when the category list successfully updated */
+    override fun categoryListUpdated(data: List<Category>) {
         categoriesMap.clear()
         data.forEach { category -> categoriesMap.put(category.name!!, category) }
-        viewState.updateTopicList(categoriesMap.keys)
+        viewState.setCategoriesData(categoriesMap.keys)
+        viewState.setSelectedCategory(selectedCategory)
     }
     // _________________________________________________________
 
 
     fun refreshButtonClicked() {
         Log.d(TAG, "Refresh button clicked")
-        initialization()
+        updateCategories()
     }
 
-    // invoke this function when you need to update the list of products
+    /** invoke this function when you need to update the list of products */
     fun productListRefresh() {
         if (categoriesMap[selectedCategory] != null) {
             productListModel.updateProducts(categoriesMap[selectedCategory]!!.slug!!)

@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import com.google.gson.Gson
 import com.junior.forjunto.App
+import com.junior.forjunto.mvp.presenter.IProductListPresenter
 import com.junior.forjunto.network.RetrofitModel
 import retrofit2.Call
 import retrofit2.Callback
@@ -16,15 +17,16 @@ class ProductDataUsage(val productListPresenter: IProductListPresenter) {
     private val TAG: String = "Products model"
     private var dbHelper = DBHelper(App.getContextApp())
 
-
-    // invoke this function if you want update product list from server
+    /** invoke this function if you want update product list from server */
     fun updateProducts(category: String) {
         getProducts(category)
     }
 
-
-    // this function getting products from producthunt api, cache it in memory
-    // When is done function invoke callback from presenter class
+    /**
+     * this function getting products from producthunt api, cache it in memory
+     * if producthunt api is unreachable data will be retrieved from cache
+     * When is done function invoke callback from presenter class
+     */
     private fun getProducts(category: String) {
         productListPresenter.productListUpdating()
         RetrofitModel.getApi().getProducts(category).enqueue(object : Callback<ProductHuntProductsApiResponse> {
@@ -47,17 +49,13 @@ class ProductDataUsage(val productListPresenter: IProductListPresenter) {
     }
 
 
-    // Saving topics data in cache
-    // key: topic name (slug)
-    // value: List of Products object
-    // and call callback
-    private fun cacheProductsList(posts: List<Post>?, category: String) {
+    /** Saving products data into cache */
+    private fun cacheProductsList(posts: List<Product>?, category: String) {
         val db = dbHelper.writableDatabase
-        val gson = Gson()
 
         if (posts != null) {
             val sqlEscapeId = DatabaseUtils.sqlEscapeString(category)
-            val sqlEscapeObj = DatabaseUtils.sqlEscapeString(gson.toJson(posts))
+            val sqlEscapeObj = DatabaseUtils.sqlEscapeString(Gson().toJson(posts))
             db.execSQL("replace into Products (id, obj) values ($sqlEscapeId ,$sqlEscapeObj);")
         } else {
             productListPresenter.productListUpdatingError()
@@ -68,15 +66,16 @@ class ProductDataUsage(val productListPresenter: IProductListPresenter) {
     }
 
 
-    // function to get list of Products by category from cache
-    // invoke this function if you want update product list from cache
+    /**
+     * function to get list of Products by category from cache
+     * when is done will be called callback functions
+     */
     private fun getProductListFromCache(category: String) {
-        val gson = Gson()
         val db = dbHelper.writableDatabase
         val c = db.query("Products", arrayOf("obj"), "id == \"" + category + "\"", null, null, null, null)
 
         if (c.moveToFirst()) {
-            val data = gson.fromJson("{posts=${c.getString(0)}}", ProductHuntProductsApiResponse::class.java)
+            val data = Gson().fromJson("{posts=${c.getString(0)}}", ProductHuntProductsApiResponse::class.java)
             productListPresenter.productListUpdated(data, category)
         } else {
             Log.d(TAG, "0 rows")
@@ -88,15 +87,12 @@ class ProductDataUsage(val productListPresenter: IProductListPresenter) {
     }
 
     internal inner class DBHelper(context: Context) : SQLiteOpenHelper(context, "ProducthuntDB", null, 1) {
-
         override fun onCreate(db: SQLiteDatabase) {
-            db.execSQL("CREATE TABLE Topics ( id text primary key, obj text);")
+            db.execSQL("CREATE TABLE Categories ( id text primary key, obj text);")
             db.execSQL("CREATE TABLE Products ( id text primary key, obj text);")
         }
 
-        override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-
-        }
+        override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {}
     }
 
 }

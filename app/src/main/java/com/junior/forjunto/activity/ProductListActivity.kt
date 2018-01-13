@@ -3,9 +3,9 @@ package com.junior.forjunto.activity
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
+import android.support.v4.content.res.ResourcesCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
@@ -15,7 +15,7 @@ import com.arellomobile.mvp.presenter.InjectPresenter
 import com.google.gson.Gson
 import com.junior.forjunto.ProductRecyclerViewAdapter
 import com.junior.forjunto.R
-import com.junior.forjunto.mvp.model.Post
+import com.junior.forjunto.mvp.model.Product
 import com.junior.forjunto.mvp.presenter.ProductListPresenter
 import com.junior.forjunto.mvp.view.ProductListView
 import kotlinx.android.synthetic.main.activity_product_list.*
@@ -30,109 +30,120 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
     @InjectPresenter
     lateinit var productListPresenter: ProductListPresenter
 
-    private val spinner by lazy {
+    // array for dataset of categories
+    private var categoriesDataList = mutableListOf<String>()
+
+    // spinner of categories
+    private val categoriesSpinner by lazy {
         categorySpinner.apply {
-            adapter = this@ProductListActivity.adapter
-            prompt = "Tech"
-            //  setSelection(0)
+            adapter = this@ProductListActivity.categoriesSpinnerAdapter
             onItemSelectedListener = this@ProductListActivity
         }
     }
 
-    private val adapter by lazy {
-        ArrayAdapter(this, R.layout.simple_spinner_item, data).apply {
+    // adapter for categories spinner
+    private val categoriesSpinnerAdapter by lazy {
+        ArrayAdapter(this, R.layout.simple_spinner_item, categoriesDataList).apply {
             setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
         }
     }
 
-    private var data = arrayListOf("Tech")
-    private var productData = mutableListOf<Post>()
-    private var mLayoutManager: RecyclerView.LayoutManager? = null
-    private var rvAdapter: RecyclerView.Adapter<*>? = null
+    // layout for update product dataset
+    private val swipeRefreshLayout by lazy {
+        swiperefresh.apply {
+            setOnRefreshListener(this@ProductListActivity)
+        }
+    }
+
+    // listener to handle clicks on product
+    private val onProductClickListener = View.OnClickListener { v ->
+        productListPresenter.newProductSelected(v.product_name_text_view.text.toString())
+    }
+
+
+    // list of products
+    private val productListRecyclerView by lazy {
+        productListRV.apply {
+            layoutManager = LinearLayoutManager(this@ProductListActivity)
+            adapter = productsRecyclerViewAdapter
+        }
+    }
+
+    // adapter for product list recycler view
+    private val productsRecyclerViewAdapter = ProductRecyclerViewAdapter(listOf(), onProductClickListener)
+
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_list)
-        init()
+        initUIElements()
     }
 
-    private fun init() {
-        Log.d("Inasd", "asdasd")
-        data = arrayListOf(productListPresenter.selectedCategory)
-        swiperefresh!!.setOnRefreshListener(this)
-        rvAdapter = ProductRecyclerViewAdapter(productData, myListener)
-        mLayoutManager = LinearLayoutManager(this)
-        product_list_recycler_view
-        configureRecyclerView()
-        refreshButton?.setOnClickListener(myListener)
+    // init UI elements here
+    // set adapters, listeners, and more...
+    private fun initUIElements() {
+        refreshButton.setOnClickListener({ productListPresenter.refreshButtonClicked() })
+        loading_progress_bar.indeterminateDrawable.setColorFilter(ResourcesCompat.getColor(resources, R.color.colorPrimary, null),
+                android.graphics.PorterDuff.Mode.SRC_IN)
+        categoriesSpinner // invoke variable to init adapters
+        productListRecyclerView // invoke variable to init adapters
     }
 
-    override fun changeActivityToProduct(product: Post) {
+    // this method switching activity to product activity and giving extras
+    override fun changeActivityToProduct(product: Product) {
         val intent = Intent(this, ProductActivity::class.java)
-
-        val gson = Gson()
-        intent.putExtra("product", gson.toJson(product))
-
+        intent.putExtra("product", Gson().toJson(product)) // using to fill product activity UI
         startActivity(intent)
     }
 
+    // hide progress bar on swiperefresh
     override fun endRefresh() {
-        swiperefresh?.isRefreshing = false
+        swipeRefreshLayout?.isRefreshing = false
     }
 
+    // refresh from swiperefresh layout
     override fun onRefresh() {
-        productListPresenter.productListRefresh()
         Log.d("Refresh", "Invoke")
+        productListPresenter.productListRefresh()
     }
 
     // update a list of products
-    override fun updateProductList(data: List<Post>) {
-        data.forEach { theme -> Log.d("Products", theme.name) }
-        productData.clear()
-        productData = data.toMutableList()
-        product_list_recycler_view!!.adapter = ProductRecyclerViewAdapter(productData, myListener)
-        product_list_recycler_view!!.adapter.notifyDataSetChanged()
+    override fun updateProductList(data: List<Product>) {
+        data.forEach { theme -> Log.d("Products", theme.name) } // just a logging
+
+        // set adapter with new dataset to update list of products
+        productListRecyclerView.adapter = ProductRecyclerViewAdapter(data.toMutableList(), onProductClickListener)
     }
 
     // show an snackbar with message
     override fun showSnackBarMessage(message: String) {
-        Snackbar.make(layout_product_list, message, Snackbar.LENGTH_LONG).setAction("Ok", null).show()
+        Snackbar.make(layout_product_list, message, Snackbar.LENGTH_LONG).show()
     }
 
-
-    private fun configureRecyclerView() {
-        product_list_recycler_view!!.layoutManager = mLayoutManager
-        product_list_recycler_view!!.adapter = rvAdapter
-    }
 
     // update a categories list
-    override fun updateTopicList(data: Set<String>) {
+    // save the selected category, after updating dataset, will be selected the saved category
+    override fun setCategoriesData(data: Set<String>) {
+        val selectedItem = categoriesSpinner?.selectedItem.toString()
 
-        val selectedItem = if (spinner!!.selectedItem != null) {
-            spinner!!.selectedItem.toString()
-        } else {
-            "Tech"
-        }
+        categoriesDataList.clear()
+        data.forEach { categoriesDataList.add(it) }
 
-        this.data.clear()
-        data.forEach { this.data.add(it) }
-        val index = data.indexOf(selectedItem)
-
-        adapter.notifyDataSetChanged()
-        spinner!!.setSelection(index)
+        categoriesSpinnerAdapter.notifyDataSetChanged()
+        categoriesSpinner.setSelection(data.indexOf(selectedItem))
     }
 
 
     override fun onNothingSelected(parent: AdapterView<*>?) {
-        Log.d("NOTHING SELECTED", "INVOKE")
+        Log.d("onNothingSelected", "Invoke!")
     }
 
     // this method will be called when new category selected
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        productListPresenter.newCategorySelected(spinner!!.selectedItem.toString())
-        Log.d("CATEGORY SELECTED", "INVOKE")
+        productListPresenter.newCategorySelected(categoriesSpinner.selectedItem.toString())
     }
 
     override fun setErrorRefreshMessageVisibility(isVisible: Boolean) {
@@ -145,26 +156,18 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
 
     override fun setSwipeRefreshVisibility(isVisible: Boolean) {
         if (isVisible) {
-            swiperefresh.visibility = View.VISIBLE
+            swipeRefreshLayout.visibility = View.VISIBLE
         } else {
-            swiperefresh.visibility = View.GONE
+            swipeRefreshLayout.visibility = View.GONE
         }
     }
 
     override fun setRecyclerViewVisibility(isVisible: Boolean) {
         if (isVisible) {
-            product_list_recycler_view.visibility = View.VISIBLE
+            productListRecyclerView.visibility = View.VISIBLE
         } else {
-            product_list_recycler_view.visibility = View.GONE
+            productListRecyclerView.visibility = View.GONE
         }
-    }
-
-    private val myListener = View.OnClickListener { v ->
-        when (v) {
-            refreshButton -> productListPresenter.refreshButtonClicked()
-            else -> productListPresenter.newProductSelected(v.product_name_text_view.text.toString())
-        }
-
     }
 
     override fun setProgressVisibility(isVisible: Boolean) {
@@ -183,4 +186,12 @@ class ProductListActivity : MvpAppCompatActivity(), ProductListView, AdapterView
         }
     }
 
+    // if categories data list contains saved in cache category select it else choose Tech
+    override fun setSelectedCategory(categoryName: String) {
+        if (categoriesDataList.contains(categoryName)) {
+            categoriesSpinner.setSelection(categoriesDataList.indexOf(categoryName))
+        } else {
+            categoriesSpinner.setSelection(categoriesDataList.indexOf("Tech"))
+        }
+    }
 }

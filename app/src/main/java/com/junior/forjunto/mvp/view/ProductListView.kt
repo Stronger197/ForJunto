@@ -3,15 +3,15 @@ package com.junior.forjunto.mvp.view
 import com.arellomobile.mvp.MvpView
 import com.arellomobile.mvp.viewstate.strategy.SkipStrategy
 import com.arellomobile.mvp.viewstate.strategy.StateStrategyType
-import com.junior.forjunto.mvp.model.Post
+import com.junior.forjunto.mvp.model.Product
 
 interface ProductListView : MvpView {
-    fun updateTopicList(data: Set<String>)
-    fun updateProductList(data: List<Post>)
+    fun setCategoriesData(data: Set<String>)
+    fun updateProductList(data: List<Product>)
     fun endRefresh()
 
     @StateStrategyType(SkipStrategy::class)
-    fun changeActivityToProduct(product: Post)
+    fun changeActivityToProduct(product: Product)
 
     @StateStrategyType(SkipStrategy::class)
     fun showSnackBarMessage(message: String)
@@ -21,6 +21,6 @@ interface ProductListView : MvpView {
     fun setRecyclerViewVisibility(isVisible: Boolean)
     fun setProgressVisibility(isVisible: Boolean)
     fun setNothingImageVisibility(isVisible: Boolean)
-
+    fun setSelectedCategory(categoryName: String)
 
 }
