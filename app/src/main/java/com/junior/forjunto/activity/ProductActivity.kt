@@ -24,7 +24,7 @@ class ProductActivity : MvpAppCompatActivity(), ProductView {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product)
-        get_button!!.setOnClickListener({ productPresenter.buttonClick() })
+        get_button.setOnClickListener({ productPresenter.buttonClick() })
     }
 
     override fun setAppbarTitle(title: String) {

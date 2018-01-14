@@ -16,7 +16,7 @@ import retrofit2.Response
 
 class CategoriesDataUsage(val productListPresenter: IProductListPresenter) {
     private val TAG: String = "Categories model"
-    private var dbHelper: DBHelper? = null
+    private var dbHelper = DBHelper(App.getContextApp())
 
     /** invoke this function if you want update categories list from server */
     fun updateCategories() {
@@ -52,7 +52,7 @@ class CategoriesDataUsage(val productListPresenter: IProductListPresenter) {
 
     /** Saving categories into cache */
     private fun cacheCategoriesList(topics: List<Category>) {
-        val db = getDbHelper().writableDatabase
+        val db = dbHelper.writableDatabase
 
         for (topic in topics) {
             val sqlEscapeId = DatabaseUtils.sqlEscapeString(topic.slug)
@@ -69,7 +69,7 @@ class CategoriesDataUsage(val productListPresenter: IProductListPresenter) {
      * invoke this function if you want update category list from cache
      */
     private fun getCategoriesListFromCache() {
-        val db = getDbHelper().writableDatabase
+        val db = dbHelper.writableDatabase
         val c = db.query("Categories", arrayOf("obj"), null, null, null, null, null)
         val data = mutableListOf<Category>()
         if (c.moveToFirst()) {
@@ -84,15 +84,6 @@ class CategoriesDataUsage(val productListPresenter: IProductListPresenter) {
         db.close()
 
         productListPresenter.categoryListUpdated(data)
-    }
-
-
-    private fun getDbHelper(): DBHelper {
-        if (dbHelper == null) {
-            dbHelper = DBHelper(App.getContextApp())
-        }
-
-        return dbHelper as DBHelper
     }
 
     internal inner class DBHelper(context: Context) : SQLiteOpenHelper(context, "ProducthuntDB", null, 1) {

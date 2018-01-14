@@ -24,15 +24,15 @@ class ProductPresenter : MvpPresenter<ProductView>() {
     }
 
     private fun fillscreen() {
-        viewState.setImage(product!!.screenshotUrl!!.image_300px.toString())
-        viewState.setDescription(product!!.tagline.toString())
-        viewState.setName(product!!.name.toString())
-        viewState.setUpvotes(product!!.votesCount!!)
+        viewState.setImage(product?.screenshotUrl?.image_300px.toString())
+        viewState.setDescription(product?.tagline.toString())
+        viewState.setName(product?.name.toString())
+        viewState.setUpvotes(product?.votesCount!!)
         viewState.setAppbarTitle(PreferencesUsage.getSelectedCategory())
     }
 
     fun buttonClick() {
-        viewState.openWebPage(product!!.redirectUrl!!)
+        viewState.openWebPage(product?.redirectUrl!!)
     }
 
 }
